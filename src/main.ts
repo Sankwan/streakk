@@ -10,6 +10,7 @@ import { FixedClock, clamp } from './math.ts';
 import {createTaxi} from './taxi.ts';
 import {addGhanaFrontage} from './scenery.ts';
 import {RenderBudget,GRAPHICS,type Quality} from './performance.ts';
+import {LocalRaceAuthority} from './network/authority.ts';
 import './style.css';
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const keys = new Set<string>(), touches = new Set<string>();
@@ -32,7 +33,7 @@ async function main() {
  function applyTheme(){const harbour=course.definition.theme==='harbour',night=course.definition.id==='accra-ring',color=night?0x182833:harbour?0x9caeb3:0x20373b;scene.background=new THREE.Color(color);scene.fog=new THREE.FogExp2(color,night?.00145:harbour?.0011:.0032);renderer.toneMappingExposure=night?.94:harbour?1.04:1.35;sun.color.setHex(night?0x9ebfe6:0xffe0ad);sun.intensity=night?2.7:3.8;}
  applyTheme();
  const world=new RAPIER.World({x:0,y:-9.81,z:0});world.timestep=1/60;let trackColliders=addPhysics(world,course);world.step();
- const simulation=new RaceSimulation(world,course,4);const player=simulation.player,vehicle=player.vehicle,opponents=[...simulation.racers.values()].filter(r=>r.isAI);let useQueued=false,swapQueued=false,assisted=false;
+ const simulation=new RaceSimulation(world,course,4),authority=new LocalRaceAuthority(simulation);const player=simulation.player,vehicle=player.vehicle,opponents=[...simulation.racers.values()].filter(r=>r.isAI);let useQueued=false,swapQueued=false,assisted=false;
  const rivalLooks=[{color:0x40566a,accent:0xb27a3d},{color:0x6a3940,accent:0xc6a867},{color:0x31594c,accent:0xc98445}];
  const rivalCars=opponents.map((racer,i)=>{const model=createTaxi({name:racer.name,...rivalLooks[i]});scene.add(model.root);return {racer,model,effects:racerEffects(model.root,racer)};});
  const pulseFX=projectileVisuals(scene,simulation),magnetFX=magnetVisuals(scene,simulation),mineFX=mineVisuals(scene,simulation);const activePickups=pickupVisuals(scene,simulation);
@@ -109,7 +110,7 @@ async function main() {
  function animate(now:number){const rawMs=now-last,dt=Math.min(rawMs/1000,.1);last=now;warmup=Math.max(0,warmup-dt);if(running&&!paused&&warmup===0){const stats=renderBudget.observe(rawMs);if(stats){$('frame-p95').textContent=stats.p95.toFixed(1)+' ms';$('frame-p50').textContent=stats.p50.toFixed(1)+' ms';if(quality==='auto')applyQuality();}}frameCount++;fpsTime+=Math.max(0,rawMs)/1000;if(fpsTime>=.5){$('fps').textContent=String(Math.round(frameCount/fpsTime));frameCount=0;fpsTime=0;}
   let alpha=1;
   if(running&&!paused){alpha=clock.advance(dt,()=>{
-    simulation.tick({drive:assisted?driveAI(vehicle,course,player.s,-3.2):input(),use:useQueued,swap:swapQueued});pulseFX.record(simulation.combatImpacts);mineFX.record();useQueued=swapQueued=false;
+    authority.step({drive:assisted?driveAI(vehicle,course,player.s,-3.2):input(),use:useQueued,swap:swapQueued});pulseFX.record(simulation.combatImpacts);mineFX.record();useQueued=swapQueued=false;
     progressS=player.s;elapsed=player.lapTime;lap=Math.min(simulation.targetLaps,player.completedLaps+1);
     for(const event of simulation.events){if(event.racerId==='you'){notify(event.text);if(event.type==='lap'){best=Math.min(best,player.lapTimes.at(-1)!);}if((event.type==='damage'||event.type==='hit'||event.type==='shield-hit')&&simulation.time>=cameraImpactReady){cameraTrauma=Math.max(cameraTrauma,event.type==='shield-hit'?.24:.48);cameraImpactReady=simulation.time+.38;}}}
 

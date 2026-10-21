@@ -1,6 +1,6 @@
 # Streak
 
-A browser arcade racer with Ghana taxi racecars, wide original circuits and compact power-ups. Three.js renders the game; Rapier handles the shared vehicle simulation. The current development milestone is **Combat Roads 0.10.0**: a more expressive chase camera, rear mines, clearer impact feedback, and the new Accra Ring Night Run.
+A browser arcade racer with Ghana taxi racecars, wide original circuits and compact power-ups. Three.js renders the game; Rapier handles the shared vehicle simulation. The current development milestone is **LAN Foundation 0.11.0**: versioned player commands and race snapshots, stale-command rejection, reset-safe event IDs, and independent commands for multiple human racers in one authoritative physics tick.
 
 ## Run from source
 
@@ -22,7 +22,7 @@ The Python launcher opens http://127.0.0.1:8768/. Keep its Terminal open. Source
 
 ## Controls
 
-WASD/arrows drive; Space drifts; E uses the selected item; Q swaps inventory slots; R restarts the pack; C changes camera; P/Escape pauses. Choose a circuit before starting. Sound starts muted. WATCH AI DEMO is labelled and can hand control back to the player. See [Combat Roads notes](docs/combat-roads-0.10.md) for the current changes and evidence.
+WASD/arrows drive; Space drifts; E uses the selected item; Q swaps inventory slots; R restarts the pack; C changes camera; P/Escape pauses. Choose a circuit before starting. Sound starts muted. WATCH AI DEMO is labelled and can hand control back to the player. See [LAN Foundation notes](docs/lan-foundation-0.11.md) for the current changes and evidence.
 
 ## Branches and builds
 

@@ -1,10 +1,10 @@
-Streak Combat Roads 0.10 validation
+Streak LAN Foundation 0.11 validation
 Date: 2026-10-21
 
 npm test
-- 48 tests passed; 0 failed.
-- New coverage includes mine arming, owner immunity, bounded disruption, shield
-  absorption, capacity/reset behavior, Accra Ring geometry and all prior regressions.
+- 52 tests passed; 0 failed.
+- New coverage includes protocol validation, stale command rejection, JSON snapshots,
+  reset-safe event IDs, independent human commands and all prior regressions.
 - Multi-car simulation still advances exactly one shared Rapier world step per tick.
 
 npm run test:routes
@@ -19,11 +19,12 @@ npm run test:race
 
 npm run build -- --configLoader runner
 - TypeScript and Vite production build passed.
-- Game entry chunk: 32.03 kB minified / 13.34 kB gzip.
+- Game entry chunk: 35.18 kB minified / 14.44 kB gzip.
 - Shared Three.js/Rapier chunk remains about 1.86 MB gzip and needs later loading optimisation.
 
 Runtime availability check
-- The existing Vite server returned HTTP 200 and served the Combat Roads 0.10 page.
+- The existing Vite server returned HTTP 200 and served the LAN Foundation 0.11 page.
+- Protocol commands, snapshots, sequence rejection, reset-safe event IDs and multi-human command dispatch have focused coverage.
 - Interactive computer/browser control was disabled in Work settings, so this run could
   not repeat the earlier manual driving, camera-comfort and live FPS inspection.
 

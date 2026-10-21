@@ -34,7 +34,9 @@ export function chooseAILane(racer:Racer,course:Course,racers:Iterable<Racer>,fi
  return best;
 }
 export interface Command {drive:DriverInput;use?:boolean;swap?:boolean;}
-export interface RaceEvent {type:'pickup'|'use'|'damage'|'lap'|'finish'|'recover'|'notice'|'fire'|'hit'|'shield-hit';racerId:string;text:string;}
+export type RaceCommands=Command|ReadonlyMap<string,Command>;
+const NO_COMMAND:Command={drive:EMPTY_INPUT};
+export interface RaceEvent {id:string;raceEpoch:number;tick:number;type:'pickup'|'use'|'damage'|'lap'|'finish'|'recover'|'notice'|'fire'|'hit'|'shield-hit';racerId:string;text:string;}
 export interface CombatImpact extends ProjectileImpact {result:'hit'|'shield'|'protected'|'wall'|'expired';}
 export class RaceSimulation {
  readonly racers=new Map<string,Racer>();
@@ -42,7 +44,7 @@ export class RaceSimulation {
  magnetFields:MagnetField[]=[];
  mines:Mine[]=[];mineBursts:MineBurst[]=[];
  combatImpacts:CombatImpact[]=[];
- course:Course;pickups:Pickup[]=[];time=0;countdown=3;ticks=0;events:RaceEvent[]=[];
+ course:Course;pickups:Pickup[]=[];time=0;countdown=3;ticks=0;raceEpoch=0;events:RaceEvent[]=[];
  readonly targetLaps=2;
  readonly world:RAPIER.World;
  constructor(world:RAPIER.World,course:Course,packSize=2){
@@ -60,7 +62,7 @@ export class RaceSimulation {
  }
  get player(){return this.racers.get('you')!;}
  reset(course=this.course){
-  this.projectiles.reset();this.magnetFields=[];this.mines=[];this.mineBursts=[];this.combatImpacts=[];this.course=course;this.time=0;this.countdown=3;this.ticks=0;this.events=[];this.pickups=makePickups(course);
+  this.projectiles.reset();this.magnetFields=[];this.mines=[];this.mineBursts=[];this.combatImpacts=[];this.course=course;this.time=0;this.countdown=3;this.ticks=0;this.raceEpoch++;this.events=[];this.pickups=makePickups(course);
   for(const racer of this.racers.values()){
    const s=course.length*course.definition.spawnFraction+racer.gridIndex*8,p=course.sample(s);
    const lane=MathUtils.clamp(p.width*racer.laneBias,-p.width/2+4,p.width/2-4);racer.aiLane=lane;racer.laneDecisionAt=0;
@@ -94,7 +96,7 @@ export class RaceSimulation {
   if(racer.health===0){racer.wreckUntil=this.time+2;this.projectiles.cancelOwner(racer.id);racer.inventory=[];racer.boostUntil=racer.shieldUntil=0;}
   return true;
  }
- private emit(type:RaceEvent['type'],racer:Racer,text:string){this.events.push({type,racerId:racer.id,text});}
+ private emit(type:RaceEvent['type'],racer:Racer,text:string){const index=this.events.length;this.events.push({id:`${this.raceEpoch}:${this.ticks}:${index}:${racer.id}:${type}`,raceEpoch:this.raceEpoch,tick:this.ticks,type,racerId:racer.id,text});}
  private projectileTargets(predict=0):ProjectileTarget[]{
   return [...this.racers.values()].map(r=>{const v=r.vehicle;return {id:r.id,previousPosition:predict?v.currentPosition.clone():v.previousPosition,position:predict?v.currentPosition.clone().addScaledVector(new Vector3().copy(v.body.linvel()),predict):v.currentPosition,previousRotation:predict?v.currentRotation:v.previousRotation,rotation:v.currentRotation,eligible:r.finishTime===null&&r.wreckUntil<=this.time};});
  }
@@ -180,14 +182,15 @@ export class RaceSimulation {
    winner.inventory.push(pickup.kind);pickup.availableAt=this.time+12;this.emit('pickup',winner,PICKUP_NAMES[pickup.kind]+' collected');
   }
  }
- tick(command:Command){
+ tick(commands:RaceCommands){
   this.events=[];this.combatImpacts=[];this.mineBursts=[];
   if(this.countdown>0){this.countdown=Math.max(0,this.countdown-STEP);return;}
   this.time+=STEP;this.ticks++;
   this.magnetFields=this.magnetFields.filter(field=>field.expiresAt>this.time);
   this.updateLocks();
-  if(command.swap&&this.player.inventory.length===2)this.player.inventory.reverse();
   for(const racer of this.racers.values()){
+   const command=commands instanceof Map?commands.get(racer.id)??NO_COMMAND:racer.id===this.player.id?commands:NO_COMMAND;
+   if(!racer.isAI&&command.swap&&racer.inventory.length===2)racer.inventory.reverse();
    if(racer.wreckUntil>0&&racer.wreckUntil<=this.time)this.recover(racer);
    const vehicle=racer.vehicle,p=this.course.project(vehicle.currentPosition,racer.s);racer.s=p.s;vehicle.offroad=p.distance>p.width/2-.15;
    if(racer.isAI&&racer.inventory.length){
@@ -195,7 +198,7 @@ export class RaceSimulation {
     const slot=racer.inventory.findIndex(kind=>kind==='pulse'?this.canHitPulse(racer):kind==='magnet'?this.standings()[0]?.id!==racer.id:kind==='mine'?this.standings().some(other=>other.id!==racer.id&&signedGap(other.s,racer.s,this.course.length)>0&&signedGap(other.s,racer.s,this.course.length)<20):kind==='repair'?racer.health<75:kind==='boost'?ahead.forward.dot(this.course.sample(racer.s).forward)>.98:vehicle.currentPosition.distanceTo(this.player.vehicle.currentPosition)<15);
     if(slot>=0){if(slot===1)racer.inventory.reverse();this.use(racer);}
    }
-   else if(racer.id===this.player.id&&command.use)this.use(racer);
+   else if(!racer.isAI&&command.use)this.use(racer);
    if(racer.isAI&&racer.laneDecisionAt<=this.time){racer.aiLane=chooseAILane(racer,this.course,this.racers.values(),this.magnetFields,this.mines);racer.laneDecisionAt=this.time+.45;}
    vehicle.boostActive=racer.boostUntil>this.time;
    let drive=racer.finishTime!==null||racer.wreckUntil>this.time?{...EMPTY_INPUT,brake:vehicle.forwardSpeed>1?1:0}:racer.isAI?driveAI(vehicle,this.course,racer.s,racer.aiLane):command.drive;

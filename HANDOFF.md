@@ -8,10 +8,10 @@ This document is the working brief for continuing Streak in Claude or another Co
 
 - Repository: `https://github.com/Sankwan/streakk`
 - Continue on: `development`
-- Previous validated development commit: `9e58534939f38e346c10d2e7e727200c0fe58b16`
-- Current source milestone: Combat Roads 0.10.0 (camera, mine, impact feedback and third track)
+- Previous validated development commit: `0b27883407f788b30102a06f7924038e6443fd70`
+- Current source milestone: LAN Foundation 0.11.0 (network protocol and multi-human authority boundary)
 - Current release baseline on `main`: `6383aa6c6502967c57843a2822eadad7b3ba2a0e`
-- Current packaged build: `artifacts/Streak-v0.9.0-dbc16dcfe995.zip`
+- Current packaged build: `artifacts/Streak-v0.10.0-0b27883407f7.zip`
 - Local working folder used during development: `/Users/gabby/Documents/Codex/2026-10-21/i-w/work/streakk-repository`
 
 The GitHub commit was created through the GitHub app because local HTTPS Git authentication was unavailable. Its tree matches the validated local 0.9 tree, although the local commit IDs differ. Before the next push, fetch the remote `development` head and use a normal fast-forward update or the GitHub Git Data API with an expected-head lease. Never force-push.
@@ -234,4 +234,4 @@ Package only after the working tree is clean and validation passes. Update `READ
 
 ## Immediate start prompt for the next assistant
 
-> Continue Streak from `Sankwan/streakk` branch `development`. Read `AGENTS.md`, `HANDOFF.md` and `docs/combat-roads-0.10.md`. Begin the offline LAN milestone with a host-authoritative 2–4 player room slice while preserving the local single-player loop and one shared Rapier world step per fixed tick. Validate all tests/routes/races/build plus browser playtests, use short commit messages, push validated milestones to `development`, and do not modify `main` without Gabriel's explicit agreement.
+> Continue Streak from `Sankwan/streakk` branch `development`. Read `AGENTS.md`, `HANDOFF.md` and `docs/lan-foundation-0.11.md`. Build the offline LAN lobby and host process on the versioned command/snapshot boundary while preserving the local single-player loop and one shared Rapier world step per fixed tick. Validate all tests/routes/races/build plus browser playtests, use short commit messages, push validated milestones to `development`, and do not modify `main` without Gabriel's explicit agreement.
