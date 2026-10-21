@@ -34,6 +34,8 @@ export class Vehicle {
   state = 'GRIP';
   offroad = false;
   boostActive = false;
+  draft = 0;
+  dragScale = 1;
   previousPosition = new Vector3();
   currentPosition = new Vector3();
   previousRotation = new Quaternion();
@@ -51,7 +53,7 @@ export class Vehicle {
     this.body.setTranslation(this.spawnPosition, true); this.body.setRotation(this.spawnRotation, true);
     this.body.setLinvel({ x: 0, y: 0, z: 0 }, true); this.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
     this.body.resetForces(true); this.body.resetTorques(true);
-    this.boostActive = false; this.steer = this.steerInput = this.throttleInput = this.brakeInput = 0; this.gripResponse=11.5;this.speed = 0; this.forwardSpeed = 0; this.slip = 0; this.contacts = 0;
+    this.boostActive = false;this.draft=0;this.dragScale=1; this.steer = this.steerInput = this.throttleInput = this.brakeInput = 0; this.gripResponse=11.5;this.speed = 0; this.forwardSpeed = 0; this.slip = 0; this.contacts = 0;
     this.previousPosition.copy(this.spawnPosition); this.currentPosition.copy(this.spawnPosition);
     this.previousRotation.copy(this.spawnRotation); this.currentRotation.copy(this.spawnRotation);
   }
@@ -113,7 +115,7 @@ export class Vehicle {
       this.body.addForceAtPoint(wheelForward.multiplyScalar(fx * scale).add(wheelRight.multiplyScalar(fy * scale)), forcePoint, true);
     }
     this.state = this.contacts < 2 ? 'AIR' : input.handbrake && this.speed > 4 ? 'DRIFT' : Math.abs(this.slip) > .16 ? 'RECOVER' : 'GRIP';
-    const resistance = vel.clone().multiplyScalar(-(.6 * this.speed + 32));
+    const resistance = vel.clone().multiplyScalar(-(.6 * this.speed * this.dragScale + 32));
     if (this.contacts > 1) resistance.y -= this.speed * this.speed * 1.25;
     this.body.addForce(resistance, true);
     const stability = up.clone().cross(UP).multiplyScalar(this.mass * (this.contacts > 1 ? 12 : 2));

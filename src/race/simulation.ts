@@ -7,6 +7,7 @@ import type {Course} from '../tracks/compiler.ts';
 import {LapProgress} from '../tracks/lap.ts';
 import {driveAI} from './ai.ts';
 import {makePickups,segmentHit,PICKUP_NAMES,type PickupKind,type Pickup} from './pickups.ts';
+import {applySlipstream} from './draft.ts';
 export interface Racer {
  id:string;name:string;isAI:boolean;vehicle:Vehicle;progress:LapProgress;s:number;
  health:number;inventory:PickupKind[];boostUntil:number;shieldUntil:number;damageReadyAt:number;
@@ -188,6 +189,7 @@ export class RaceSimulation {
   this.time+=STEP;this.ticks++;
   this.magnetFields=this.magnetFields.filter(field=>field.expiresAt>this.time);
   this.updateLocks();
+  applySlipstream(this.racers.values(),this.course);
   for(const racer of this.racers.values()){
    const command=commands instanceof Map?commands.get(racer.id)??NO_COMMAND:racer.id===this.player.id?commands:NO_COMMAND;
    if(!racer.isAI&&command.swap&&racer.inventory.length===2)racer.inventory.reverse();
@@ -201,7 +203,8 @@ export class RaceSimulation {
    else if(!racer.isAI&&command.use)this.use(racer);
    if(racer.isAI&&racer.laneDecisionAt<=this.time){racer.aiLane=chooseAILane(racer,this.course,this.racers.values(),this.magnetFields,this.mines);racer.laneDecisionAt=this.time+.45;}
    vehicle.boostActive=racer.boostUntil>this.time;
-   let drive=racer.finishTime!==null||racer.wreckUntil>this.time?{...EMPTY_INPUT,brake:vehicle.forwardSpeed>1?1:0}:racer.isAI?driveAI(vehicle,this.course,racer.s,racer.aiLane):command.drive;
+   const progressGap=(this.player.completedLaps-racer.completedLaps)*this.course.length+this.player.s-racer.s,catchup=racer.isAI?MathUtils.smoothstep(progressGap,25,220):0,pace=1+[0,.015,-.005,.025][racer.gridIndex];
+   let drive=racer.finishTime!==null||racer.wreckUntil>this.time?{...EMPTY_INPUT,brake:vehicle.forwardSpeed>1?1:0}:racer.isAI?driveAI(vehicle,this.course,racer.s,racer.aiLane,{pace,catchup}):command.drive;
    const magnetic=this.fieldFor(racer);if(magnetic){
     racer.magnetUntil=this.time+STEP*2;drive={...drive,throttle:drive.throttle*MAGNET.driveScale};
     const lateralImpulse=this.course.sample(magnetic.p.s).right.multiplyScalar(MathUtils.clamp(-magnetic.p.lateral*MAGNET.pullPerTick,-MAGNET.pullPerTick*4,MAGNET.pullPerTick*4)*vehicle.mass);
@@ -229,9 +232,9 @@ export class RaceSimulation {
      if(racer.completedLaps>=this.targetLaps){racer.finishTime=this.time;this.projectiles.cancelOwner(racer.id);this.emit('finish',racer,'Finished · '+this.time.toFixed(2)+' s');}
     }
    }
-   racer.stuckTime=racer.isAI&&vehicle.speed<1?racer.stuckTime+STEP:0;
+   racer.stuckTime=racer.isAI&&racer.finishTime===null&&vehicle.speed<1?racer.stuckTime+STEP:0;
    const b=this.course.bounds;
-   if(vehicle.currentPosition.y< -3||vehicle.currentPosition.x<b.min.x-60||vehicle.currentPosition.x>b.max.x+60||vehicle.currentPosition.z<b.min.z-60||vehicle.currentPosition.z>b.max.z+60||racer.stuckTime>6)this.recover(racer);
+   if(racer.finishTime===null&&(vehicle.currentPosition.y< -3||vehicle.currentPosition.x<b.min.x-60||vehicle.currentPosition.x>b.max.x+60||vehicle.currentPosition.z<b.min.z-60||vehicle.currentPosition.z>b.max.z+60||racer.stuckTime>6))this.recover(racer);
   }
   this.collect();
  }

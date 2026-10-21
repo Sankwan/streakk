@@ -6,6 +6,7 @@ import {createCourse,addPhysics} from '../src/track.ts';
 import {Vehicle,EMPTY_INPUT} from '../src/vehicle.ts';
 import {RaceSimulation,chooseAILane,type MagnetField} from '../src/race/simulation.ts';
 import {makePickups,segmentHit} from '../src/race/pickups.ts';
+import {draftStrength} from '../src/race/draft.ts';
 await RAPIER.init();
 function setup(){const world=new RAPIER.World({x:0,y:-9.81,z:0}),course=createCourse('tema-harbour');world.timestep=1/60;addPhysics(world,course);world.step();return {world,course,sim:new RaceSimulation(world,course)};}
 function active(sim:RaceSimulation){sim.countdown=0;}
@@ -28,6 +29,12 @@ test('lane-aware AI overtakes a blocked lane and takes an outside magnet escape 
  const openLane=chooseAILane(racer,course,sim.racers.values(),[]);assert.ok(Math.abs(openLane)>1,'blocked centre line should trigger an overtake');
  blocker.finishTime=1;const field:MagnetField={id:'test',ownerId:'you',s:course.sample(s+30).s,position:course.sample(s+30).position,right:course.sample(s+30).right,halfWidth:here.width*.56/2,halfLength:12,expiresAt:10};
  const escape=chooseAILane(racer,course,sim.racers.values(),[field]);assert.ok(Math.abs(escape)>field.halfWidth,'magnet should send AI outside the active strip');assert.ok(Math.abs(escape)<=here.width/2-4+.01,'lane remains inside the barriers');world.free();
+});
+test('slipstream rewards a fast close follower without affecting distant or offset cars',()=>{
+ assert.ok(draftStrength(45,0,100,[{s:112,lateral:.2}],1000)>.8);
+ assert.equal(draftStrength(20,0,100,[{s:112,lateral:0}],1000),0);
+ assert.equal(draftStrength(45,0,100,[{s:170,lateral:0}],1000),0);
+ assert.equal(draftStrength(45,0,100,[{s:112,lateral:4}],1000),0);
 });
 test('split vehicle force/capture phases preserve the standalone handling result',()=>{
  const worlds=[new RAPIER.World({x:0,y:-9.81,z:0}),new RAPIER.World({x:0,y:-9.81,z:0})];
@@ -62,6 +69,10 @@ test('both racers obey ordered lap validation and deterministic standings',()=>{
  const ai=sim.racers.get('kojo')!;ai.s=150;sim.player.s=100;assert.equal(sim.standings()[0].id,'kojo');sim.player.completedLaps=1;assert.equal(sim.standings()[0].id,'you');
  ai.finishTime=30;sim.player.finishTime=31;assert.equal(sim.standings()[0].id,'kojo');
  world.free();
+});
+test('finished AI racers stay finished and are never recovered while the pack completes',()=>{
+ const {world,sim}=setup();active(sim);const ai=sim.racers.get('kojo')!;ai.finishTime=1;ai.vehicle.body.setLinvel({x:0,y:0,z:0},true);ai.stuckTime=5.99;
+ let recovered=false;for(let i=0;i<500;i++){sim.tick({drive:EMPTY_INPUT});recovered||=sim.events.some(e=>e.type==='recover'&&e.racerId===ai.id);}assert.equal(ai.finishTime,1);assert.equal(ai.stuckTime,0);assert.equal(recovered,false);world.free();
 });
 test('a real wall impact damages an unshielded racer and is absorbed with an active shield',()=>{
  for(const shielded of [false,true]){

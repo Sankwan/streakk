@@ -9,7 +9,7 @@ This document is the working brief for continuing Streak in Claude or another Co
 - Repository: `https://github.com/Sankwan/streakk`
 - Continue on: `development`
 - Previous validated development commit: `0b27883407f788b30102a06f7924038e6443fd70`
-- Current source milestone: LAN Foundation 0.11.0 (network protocol and multi-human authority boundary)
+- Current source milestone: Rush Pack 0.12.0 (predictive rival pace, catch-up and slipstream)
 - Current release baseline on `main`: `6383aa6c6502967c57843a2822eadad7b3ba2a0e`
 - Current packaged build: `artifacts/Streak-v0.10.0-0b27883407f7.zip`
 - Local working folder used during development: `/Users/gabby/Documents/Codex/2026-10-21/i-w/work/streakk-repository`
@@ -139,6 +139,15 @@ If night lighting is too expensive or harms visibility, ship a dusk version firs
 
 ## Work after the next batch
 
+### Revised next-build order
+
+1. **Cape Coast Rush:** a new original mixed-rhythm circuit with a wide boulevard, coastal sweepers, a short two-lane urban section and one brief one-lane squeeze. Keep traffic and pickups out of the one-lane section.
+2. **Trotro Traffic:** two or three deterministic, host-authoritative low-poly trotros on clearly marked opposing lanes. Use kinematic Rapier bodies, fixed schedules, long sight lines and guaranteed escape space.
+3. **Race Energy:** original layered engine/wind/rival audio, stronger start and final-lap presentation, close-rival and incoming-attack cues, restrained speed streaks and drafting feedback. Keep reduced-motion and mute controls.
+4. **Offline LAN Room:** Node.js/TypeScript host, 2–4 players, ready lobby, synchronized countdown and local-IP/QR joining with no internet connection.
+
+Do not add random traffic that can seal the road. Traffic schedules, collisions and snapshots must be deterministic and authoritative. Use instancing and a strict nearby-traffic cap rather than individual high-detail scene graphs.
+
 ### Offline LAN milestone
 
 Use a host-authoritative model. One player's browser hosts race authority through a small local companion server or packaged host executable; other devices connect over the same Wi-Fi/LAN. Browser-only discovery is unreliable, so provide a room code and local IP/QR join flow. The game must run without internet access.
@@ -234,4 +243,4 @@ Package only after the working tree is clean and validation passes. Update `READ
 
 ## Immediate start prompt for the next assistant
 
-> Continue Streak from `Sankwan/streakk` branch `development`. Read `AGENTS.md`, `HANDOFF.md` and `docs/lan-foundation-0.11.md`. Build the offline LAN lobby and host process on the versioned command/snapshot boundary while preserving the local single-player loop and one shared Rapier world step per fixed tick. Validate all tests/routes/races/build plus browser playtests, use short commit messages, push validated milestones to `development`, and do not modify `main` without Gabriel's explicit agreement.
+> Continue Streak from `Sankwan/streakk` branch `development`. Read `AGENTS.md`, `HANDOFF.md` and `docs/rush-pack-0.12.md`. Build Cape Coast Rush as a mixed boulevard/coast/urban circuit, then deterministic low-cost trotro traffic and stronger race feedback before the offline LAN room. Preserve the versioned command/snapshot boundary and one shared Rapier world step per fixed tick. Validate all tests/routes/races/build plus browser playtests, use short commit messages, push validated milestones to `development`, and do not modify `main` without Gabriel's explicit agreement.
