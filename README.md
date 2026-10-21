@@ -53,7 +53,7 @@ The [combat lab](audit/combat.html) supplies reproducible clear-hit, shield, bar
 
 ## Next milestone
 
-Define and add the requested mine after its placement and effect are agreed, then improve contact racing and track variety. Offline LAN, optional voice and online parties/matchmaking come after the common local race loop is stable.
+The complete continuation brief is in [HANDOFF.md](HANDOFF.md). The next tested batch covers camera feel, a compact rear mine, clearer impact feedback, and a third original Ghana-inspired track. Offline LAN, optional voice and online parties/matchmaking follow after the common local race loop is stable.
 
 ## Credits
 
