@@ -26,12 +26,12 @@ export const ACCRA_RING:TrackDefinition={
  lanes:4,sampleSpacing:3,tension:.48,arcDivisions:4096,spawnFraction:.01,theme:'harbour',seed:104,
 };
 export const CAPE_COAST:TrackDefinition={
- id:'cape-coast-rush',version:1,name:'Cape Coast Rush',subtitle:'Coast-to-town combat circuit',
+ id:'cape-coast-rush',version:2,name:'Cape Coast Rush',subtitle:'Coast-to-town combat circuit',
  description:'A fictional high-speed coastal run that changes rhythm from a broad boulevard to beachside sweepers and a short old-town squeeze.',
  points:[
   [-470,155,36],[-210,250,36],[105,265,34],[360,205,32],[500,60,30],
   [475,-170,28],[300,-315,26],[55,-345,24],[-150,-315,20],[-315,-240,15],
-  [-415,-115,14],[-500,15,20],
+  [-415,-115,14],[-500,15,28],
  ].map(([x,z,width])=>({x,z,width})),
  lanes:4,sampleSpacing:3,tension:.48,arcDivisions:4096,spawnFraction:.012,theme:'coast',seed:144,
  zones:[

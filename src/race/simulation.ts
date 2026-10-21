@@ -8,6 +8,7 @@ import {LapProgress} from '../tracks/lap.ts';
 import {driveAI} from './ai.ts';
 import {makePickups,segmentHit,PICKUP_NAMES,type PickupKind,type Pickup} from './pickups.ts';
 import {applySlipstream} from './draft.ts';
+import {advanceTraffic,createTraffic,removeTraffic,type TrafficVehicle} from './traffic.ts';
 export interface Racer {
  id:string;name:string;isAI:boolean;vehicle:Vehicle;progress:LapProgress;s:number;
  health:number;inventory:PickupKind[];boostUntil:number;shieldUntil:number;damageReadyAt:number;
@@ -20,7 +21,7 @@ export const MINE={capacity:8,armDelay:.55,lifetime:14,triggerRadius:2.15,damage
 export interface Mine {id:string;ownerId:string;s:number;position:Vector3;placedAt:number;armedAt:number;expiresAt:number;}
 export interface MineBurst {mineId:string;ownerId:string;targetId:string|null;position:Vector3;at:number;result:'hit'|'shield'|'protected'|'expired';}
 const signedGap=(from:number,to:number,length:number)=>{let gap=to-from;if(gap>length/2)gap-=length;if(gap< -length/2)gap+=length;return gap;};
-export function chooseAILane(racer:Racer,course:Course,racers:Iterable<Racer>,fields:MagnetField[],mines:Mine[]=[]){
+export function chooseAILane(racer:Racer,course:Course,racers:Iterable<Racer>,fields:MagnetField[],mines:Mine[]=[],traffic:TrafficVehicle[]=[]){
  const here=course.sample(racer.s),margin=4,extent=Math.max(1,here.width/2-margin);
  const candidates=course.definition.lanes>=4?[-.9,-.3,.3,.9].map(n=>n*extent):[-.62,.62].map(n=>n*extent);
  let best=candidates[0],bestScore=Infinity;
@@ -29,6 +30,7 @@ export function chooseAILane(racer:Racer,course:Course,racers:Iterable<Racer>,fi
   for(const other of racers){if(other.id===racer.id||other.finishTime!==null||other.wreckUntil>0)continue;const gap=signedGap(racer.s,other.s,course.length);if(gap< -8||gap>36)continue;const lateral=course.project(other.vehicle.currentPosition,other.s).lateral,overlap=Math.max(0,1-Math.abs(lateral-lane)/4.2);if(!overlap)continue;score+=overlap*(Math.abs(gap)<8?70:26*(1-gap/36));}
   for(const field of fields){const gap=signedGap(racer.s,field.s,course.length);if(gap>=-field.halfLength&&gap<90&&Math.abs(lane)<field.halfWidth+.8)score+=32;}
   for(const mine of mines){if(mine.ownerId===racer.id)continue;const gap=signedGap(racer.s,mine.s,course.length);if(gap<0||gap>65)continue;const lateral=course.project(mine.position,mine.s).lateral,overlap=Math.max(0,1-Math.abs(lateral-lane)/3.1);score+=overlap*48*(1-gap/80);}
+  for(const bus of traffic){const gap=signedGap(racer.s,bus.s,course.length);if(gap< -8||gap>125)continue;const overlap=Math.max(0,1-Math.abs(bus.lateral-lane)/5.2);score+=overlap*160*(1-Math.max(0,gap)/145);}
   score+=Math.abs(lane-racer.aiLane)*.08;
   if(score<bestScore-1e-6){best=lane;bestScore=score;}
  }
@@ -44,6 +46,7 @@ export class RaceSimulation {
  readonly projectiles=new ProjectileSystem();
  magnetFields:MagnetField[]=[];
  mines:Mine[]=[];mineBursts:MineBurst[]=[];
+ traffic:TrafficVehicle[]=[];
  combatImpacts:CombatImpact[]=[];
  course:Course;pickups:Pickup[]=[];time=0;countdown=3;ticks=0;raceEpoch=0;events:RaceEvent[]=[];
  readonly targetLaps=2;
@@ -63,7 +66,7 @@ export class RaceSimulation {
  }
  get player(){return this.racers.get('you')!;}
  reset(course=this.course){
-  this.projectiles.reset();this.magnetFields=[];this.mines=[];this.mineBursts=[];this.combatImpacts=[];this.course=course;this.time=0;this.countdown=3;this.ticks=0;this.raceEpoch++;this.events=[];this.pickups=makePickups(course);
+  this.projectiles.reset();this.magnetFields=[];this.mines=[];this.mineBursts=[];this.combatImpacts=[];removeTraffic(this.world,this.traffic);this.course=course;this.traffic=createTraffic(this.world,course);this.time=0;this.countdown=3;this.ticks=0;this.raceEpoch++;this.events=[];this.pickups=makePickups(course);
   for(const racer of this.racers.values()){
    const s=course.length*course.definition.spawnFraction+racer.gridIndex*8,p=course.sample(s);
    const lane=MathUtils.clamp(p.width*racer.laneBias,-p.width/2+4,p.width/2-4);racer.aiLane=lane;racer.laneDecisionAt=0;
@@ -201,7 +204,7 @@ export class RaceSimulation {
     if(slot>=0){if(slot===1)racer.inventory.reverse();this.use(racer);}
    }
    else if(!racer.isAI&&command.use)this.use(racer);
-   if(racer.isAI&&racer.laneDecisionAt<=this.time){racer.aiLane=chooseAILane(racer,this.course,this.racers.values(),this.magnetFields,this.mines);racer.laneDecisionAt=this.time+.45;}
+   if(racer.isAI&&racer.laneDecisionAt<=this.time){racer.aiLane=chooseAILane(racer,this.course,this.racers.values(),this.magnetFields,this.mines,this.traffic);racer.laneDecisionAt=this.time+(this.traffic.length?.18:.45);}
    vehicle.boostActive=racer.boostUntil>this.time;
    const progressGap=(this.player.completedLaps-racer.completedLaps)*this.course.length+this.player.s-racer.s,catchup=racer.isAI?MathUtils.smoothstep(progressGap,25,220):0,pace=1+[0,.015,-.005,.025][racer.gridIndex];
    let drive=racer.finishTime!==null||racer.wreckUntil>this.time?{...EMPTY_INPUT,brake:vehicle.forwardSpeed>1?1:0}:racer.isAI?driveAI(vehicle,this.course,racer.s,racer.aiLane,{pace,catchup}):command.drive;
@@ -213,7 +216,8 @@ export class RaceSimulation {
    }
    racer.previousVelocity.copy(vehicle.body.linvel());vehicle.prepare(racer.hitUntil>this.time?{...drive,throttle:drive.throttle*.65}:drive);
   }
-  // All forces have been submitted. Every car sees the same world time.
+  advanceTraffic(this.traffic,this.course);
+  // All forces and kinematic schedules have been submitted. Every body sees the same world time.
   this.world.step();
   for(const racer of this.racers.values())racer.vehicle.capture();
   this.updateMines();

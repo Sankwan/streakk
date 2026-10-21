@@ -5,7 +5,7 @@ import { createCourse, addPhysics, buildEnvironment, disposeEnvironment } from '
 import {TRACKS} from './tracks/definitions.ts';
 import {RaceSimulation} from './race/simulation.ts';
 import {driveAI} from './race/ai.ts';
-import {pickupVisuals,racerEffects,projectileVisuals,magnetVisuals,mineVisuals} from './race/visuals.ts';
+import {pickupVisuals,racerEffects,projectileVisuals,magnetVisuals,mineVisuals,trafficVisuals} from './race/visuals.ts';
 import { FixedClock, clamp } from './math.ts';
 import {createTaxi} from './taxi.ts';
 import {addGhanaFrontage} from './scenery.ts';
@@ -36,7 +36,7 @@ async function main() {
  const simulation=new RaceSimulation(world,course,4),authority=new LocalRaceAuthority(simulation);const player=simulation.player,vehicle=player.vehicle,opponents=[...simulation.racers.values()].filter(r=>r.isAI);let useQueued=false,swapQueued=false,assisted=false;
  const rivalLooks=[{color:0x40566a,accent:0xb27a3d},{color:0x6a3940,accent:0xc6a867},{color:0x31594c,accent:0xc98445}];
  const rivalCars=opponents.map((racer,i)=>{const model=createTaxi({name:racer.name,...rivalLooks[i]});scene.add(model.root);return {racer,model,effects:racerEffects(model.root,racer)};});
- const pulseFX=projectileVisuals(scene,simulation),magnetFX=magnetVisuals(scene,simulation),mineFX=mineVisuals(scene,simulation);const activePickups=pickupVisuals(scene,simulation);
+ const pulseFX=projectileVisuals(scene,simulation),magnetFX=magnetVisuals(scene,simulation),mineFX=mineVisuals(scene,simulation),trafficFX=trafficVisuals(scene,simulation);const activePickups=pickupVisuals(scene,simulation);
  const taxiAt=performance.now();const taxi=createTaxi(),car=taxi.root;$('taxi-build-time').textContent=((performance.now()-taxiAt)/1000).toFixed(2)+' s';scene.add(car);const playerEffects=racerEffects(car,player);
  const sceneryAt=performance.now();let frontage=addGhanaFrontage(environment,course);$('scenery-build-time').textContent=((performance.now()-sceneryAt)/1000).toFixed(2)+' s';$('scene-build-time').textContent=((performance.now()-bootAt)/1000).toFixed(2)+' s';
  const renderBudget=new RenderBudget();let quality:Quality='auto',lowDetail=false,warmup=3;
@@ -118,7 +118,7 @@ async function main() {
   visualPos.lerpVectors(vehicle.previousPosition,vehicle.currentPosition,alpha);visualRot.slerpQuaternions(vehicle.previousRotation,vehicle.currentRotation,alpha);car.position.copy(visualPos);car.quaternion.copy(visualRot);
   taxi.update(vehicle,running&&!paused&&simulation.countdown===0?dt:0,input().brake);
   for(const {racer,model,effects} of rivalCars){model.root.position.lerpVectors(racer.vehicle.previousPosition,racer.vehicle.currentPosition,alpha);model.root.quaternion.slerpQuaternions(racer.vehicle.previousRotation,racer.vehicle.currentRotation,alpha);model.update(racer.vehicle,running&&!paused&&simulation.countdown===0?dt:0,0);effects.update(simulation.time);}
-  playerEffects.update(simulation.time);activePickups.update();pulseFX.update(alpha,lowDetail);magnetFX.update(simulation.time);mineFX.update(simulation.time);frontage.update(visualPos,lowDetail);
+  playerEffects.update(simulation.time);activePickups.update();pulseFX.update(alpha,lowDetail);magnetFX.update(simulation.time);mineFX.update(simulation.time);trafficFX.update(alpha);frontage.update(visualPos,lowDetail);
   if(running&&!paused&&vehicle.state==='DRIFT'&&vehicle.contacts>=3){for(let j=0;j<2;j++){const v=vehicle.wheels[j+2].clone();v.y-=vehicle.wheelTravel[j+2]+.31;v.applyQuaternion(visualRot).add(visualPos);v.y=.035;if(lastSkid[j]&&lastSkid[j]!.distanceTo(v)<4){const start=skidIndex*6;skidPositions.set([lastSkid[j]!.x,.035,lastSkid[j]!.z,v.x,.035,v.z],start);skidIndex=(skidIndex+1)%2400;skidCount=Math.min(skidCount+1,2400);}lastSkid[j]=v;}skidGeo.attributes.position.needsUpdate=true;skidGeo.setDrawRange(0,skidCount*2);}else lastSkid.fill(null);
   cameraTime+=dt;const forward=new THREE.Vector3(0,0,-1).applyQuaternion(visualRot);forward.y=0;forward.normalize();cameraVelocity.copy(vehicle.body.linvel());cameraVelocity.y=0;if(cameraVelocity.lengthSq()>6.25&&vehicle.forwardSpeed>0)forward.lerp(cameraVelocity.normalize(),Math.min(.42,Math.abs(vehicle.slip)*.8)).normalize();cameraForward.lerp(forward,1-Math.exp(-dt*5.2)).normalize();const rawAccel=dt>0?(vehicle.speed-cameraSpeed)/dt:0;cameraSpeed=vehicle.speed;cameraAccel+=(clamp(rawAccel,-20,20)-cameraAccel)*(1-Math.exp(-dt*3.5));
   const desired=visualPos.clone();if(!running){desired.add(new THREE.Vector3(-9,6,-6));lookTarget.lerp(visualPos.clone().add(new THREE.Vector3(-2,0,0)),1-Math.exp(-dt*7));}else if(cameraMode===2){desired.y+=Math.max(31,course.sample(progressS).width*1.2/camera.aspect);desired.addScaledVector(cameraForward,-9);}else {desired.addScaledVector(cameraForward,cameraMode===1?-5.5:-6.4-vehicle.speed*.01-clamp(cameraAccel*.025,-.3,.38));desired.y+=cameraMode===1?1.9:2.6;}

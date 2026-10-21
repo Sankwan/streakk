@@ -1,10 +1,10 @@
-Streak Cape Coast 0.13 validation
+Streak Trotro Run 0.14 validation
 Date: 2026-10-21
 
 npm test
-- 55 tests passed; 0 failed.
-- New coverage includes route zones, mixed local lane counts, coastal environment assets,
-  pickup exclusion in the market squeeze and all existing regressions.
+- 57 tests passed; 0 failed.
+- New coverage includes deterministic traffic schedules, route bounds, escape clearance,
+  AI avoidance, reset cleanup, protocol snapshots and all existing regressions.
 - Multi-car simulation still advances exactly one shared Rapier world step per tick.
 
 npm run test:routes
@@ -17,7 +17,8 @@ npm run test:race
 - All four racers completed two laps on all four tracks.
 - 0 recoveries and 0 off-road ticks on every track.
 - Maximum dynamic bodies: 4; projectiles: 1; magnetic fields: 1.
-- Tema pack completed in 169.10 s; Accra Ring in 134.70 s; Cape Coast in 155.85 s.
+- Tema pack completed in 169.10 s; Accra Ring in 134.70 s; Cape Coast in 156.12 s.
+- Cape Coast peaked at 6 rigid bodies: 4 racers and 2 trotros.
 - The leading full-circuit cars finished within roughly 4–6 seconds.
 
 npm run build -- --configLoader runner
@@ -27,7 +28,7 @@ npm run build -- --configLoader runner
 
 Runtime availability check
 - The existing Vite server hot-reloads the Cape Coast 0.13 source for manual playtesting.
-- Protocol commands, snapshots, sequence rejection, reset-safe event IDs and multi-human command dispatch have focused coverage.
+- Protocol v2 includes traffic state; command validation, sequence rejection, reset-safe event IDs and multi-human command dispatch retain focused coverage.
 - Interactive computer/browser control was disabled in Work settings, so this run could
   not repeat the earlier manual driving, camera-comfort and live FPS inspection.
 

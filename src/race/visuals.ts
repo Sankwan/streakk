@@ -4,6 +4,11 @@ import {PULSE} from './projectiles.ts';
 import type {CombatImpact} from './simulation.ts';
 import type {RaceSimulation,Racer} from './simulation.ts';
 export const PICKUP_COLORS:Record<PickupKind,number>={boost:0x69c9ed,repair:0x83d99b,shield:0xe6c777,pulse:0xed8c78,magnet:0xb28cff,mine:0xff8b3d};
+export function trafficVisuals(scene:THREE.Scene,sim:RaceSimulation){
+ const capacity=2,bodies=new THREE.InstancedMesh(new THREE.BoxGeometry(2.36,1.8,5.7),new THREE.MeshStandardMaterial({color:0xd8c9a1,roughness:.78}),capacity),windows=new THREE.InstancedMesh(new THREE.BoxGeometry(2.4,.62,3.55),new THREE.MeshStandardMaterial({color:0x243c45,roughness:.42}),capacity),stripes=new THREE.InstancedMesh(new THREE.BoxGeometry(2.42,.22,5.74),new THREE.MeshStandardMaterial({color:0x506c74,roughness:.7}),capacity),object=new THREE.Object3D(),position=new THREE.Vector3(),rotation=new THREE.Quaternion();
+ for(const mesh of [bodies,windows,stripes]){mesh.name='traffic-pool';mesh.count=0;mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);mesh.castShadow=true;scene.add(mesh);}
+ return {update(alpha:number){let i=0;for(const bus of sim.traffic){position.lerpVectors(bus.previousPosition,bus.position,alpha);rotation.copy(bus.rotation);object.position.copy(position);object.quaternion.copy(rotation);object.scale.set(1,1,1);object.updateMatrix();bodies.setMatrixAt(i,object.matrix);object.position.y+=.43;object.updateMatrix();windows.setMatrixAt(i,object.matrix);object.position.y-=.58;object.updateMatrix();stripes.setMatrixAt(i++,object.matrix);}for(const mesh of [bodies,windows,stripes]){mesh.count=i;mesh.visible=i>0;mesh.instanceMatrix.needsUpdate=true;}},dispose(){for(const mesh of [bodies,windows,stripes]){mesh.removeFromParent();mesh.geometry.dispose();(mesh.material as THREE.Material).dispose();}}};
+}
 function iconTexture(kind:PickupKind){
  const canvas=document.createElement('canvas');canvas.width=canvas.height=96;const ctx=canvas.getContext('2d')!;
  ctx.fillStyle='#142a30';ctx.strokeStyle='#'+PICKUP_COLORS[kind].toString(16).padStart(6,'0');ctx.lineWidth=5;ctx.beginPath();ctx.roundRect(5,5,86,86,20);ctx.fill();ctx.stroke();ctx.fillStyle=ctx.strokeStyle;ctx.strokeStyle=ctx.fillStyle;

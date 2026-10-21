@@ -2,7 +2,7 @@ import type {DriverInput} from '../vehicle.ts';
 import type {Command,RaceEvent,RaceSimulation} from '../race/simulation.ts';
 import type {PickupKind} from '../race/pickups.ts';
 
-export const PROTOCOL_VERSION=1 as const;
+export const PROTOCOL_VERSION=2 as const;
 export type Vec3=[number,number,number];
 export type Quat=[number,number,number,number];
 
@@ -26,6 +26,7 @@ export interface RaceSnapshot {
  projectiles:{id:string;ownerId:string;targetId:string|null;position:Vec3;velocity:Vec3;expiresAt:number}[];
  mines:{id:string;ownerId:string;position:Vec3;armedAt:number;expiresAt:number}[];
  magnetFields:{id:string;ownerId:string;position:Vec3;right:Vec3;halfWidth:number;halfLength:number;expiresAt:number}[];
+ traffic:{id:string;position:Vec3;rotation:Quat;s:number;speed:number}[];
  events:RaceEvent[];
 }
 
@@ -54,7 +55,7 @@ export function createRaceSnapshot(sim:RaceSimulation,sequence=sim.ticks):RaceSn
   const body=racer.vehicle.body;
   return {id:racer.id,name:racer.name,isAI:racer.isAI,position:vec3(body.translation()),rotation:quat(body.rotation()),linearVelocity:vec3(body.linvel()),angularVelocity:vec3(body.angvel()),s:racer.s,health:racer.health,inventory:[...racer.inventory],completedLaps:racer.completedLaps,lapTime:racer.lapTime,lapTimes:[...racer.lapTimes],finishTime:racer.finishTime,speed:racer.vehicle.speed,forwardSpeed:racer.vehicle.forwardSpeed,slip:racer.vehicle.slip,handlingState:racer.vehicle.state,offroad:racer.vehicle.offroad,draft:racer.vehicle.draft,boostUntil:racer.boostUntil,shieldUntil:racer.shieldUntil,wreckUntil:racer.wreckUntil,hitUntil:racer.hitUntil,magnetUntil:racer.magnetUntil,lockTargetId:racer.lockTargetId,incomingLockFrom:racer.incomingLockFrom,shots:racer.shots,hits:racer.hits,shieldBlocks:racer.shieldBlocks,lastHitBy:racer.lastHitBy} satisfies RacerSnapshot;
  });
- return {type:'snapshot',protocol:PROTOCOL_VERSION,sequence,raceEpoch:sim.raceEpoch,serverTick:sim.ticks,serverTime:sim.time,countdown:sim.countdown,course:{id:sim.course.definition.id,version:sim.course.definition.version,length:sim.course.length},targetLaps:sim.targetLaps,racers,pickups:sim.pickups.map(p=>({id:p.id,kind:p.kind,availableAt:p.availableAt})),projectiles:[...sim.projectiles.active.values()].map(p=>({id:p.id,ownerId:p.ownerId,targetId:p.targetId??null,position:vec3(p.position),velocity:vec3(p.velocity),expiresAt:p.expiresAt})),mines:sim.mines.map(m=>({id:m.id,ownerId:m.ownerId,position:vec3(m.position),armedAt:m.armedAt,expiresAt:m.expiresAt})),magnetFields:sim.magnetFields.map(f=>({id:f.id,ownerId:f.ownerId,position:vec3(f.position),right:vec3(f.right),halfWidth:f.halfWidth,halfLength:f.halfLength,expiresAt:f.expiresAt})),events:sim.events.map(event=>({...event}))};
+ return {type:'snapshot',protocol:PROTOCOL_VERSION,sequence,raceEpoch:sim.raceEpoch,serverTick:sim.ticks,serverTime:sim.time,countdown:sim.countdown,course:{id:sim.course.definition.id,version:sim.course.definition.version,length:sim.course.length},targetLaps:sim.targetLaps,racers,pickups:sim.pickups.map(p=>({id:p.id,kind:p.kind,availableAt:p.availableAt})),projectiles:[...sim.projectiles.active.values()].map(p=>({id:p.id,ownerId:p.ownerId,targetId:p.targetId??null,position:vec3(p.position),velocity:vec3(p.velocity),expiresAt:p.expiresAt})),mines:sim.mines.map(m=>({id:m.id,ownerId:m.ownerId,position:vec3(m.position),armedAt:m.armedAt,expiresAt:m.expiresAt})),magnetFields:sim.magnetFields.map(f=>({id:f.id,ownerId:f.ownerId,position:vec3(f.position),right:vec3(f.right),halfWidth:f.halfWidth,halfLength:f.halfLength,expiresAt:f.expiresAt})),traffic:sim.traffic.map(bus=>({id:bus.id,position:vec3(bus.position),rotation:quat(bus.rotation),s:bus.s,speed:bus.speed})),events:sim.events.map(event=>({...event}))};
 }
 
 export function encodeWireMessage(message:PlayerCommand|RaceSnapshot){return JSON.stringify(message);}

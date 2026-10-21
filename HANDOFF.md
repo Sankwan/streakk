@@ -9,7 +9,7 @@ This document is the working brief for continuing Streak in Claude or another Co
 - Repository: `https://github.com/Sankwan/streakk`
 - Continue on: `development`
 - Current validated development head: see the remote `development` branch and verify it before changing history.
-- Current source milestone: Cape Coast 0.13.0 (mixed boulevard, coast, town and market-squeeze route)
+- Current source milestone: Trotro Run 0.14.0 (deterministic oncoming traffic and protocol v2 snapshots)
 - Current release baseline on `main`: `6383aa6c6502967c57843a2822eadad7b3ba2a0e`
 - Current packaged build: `artifacts/Streak-v0.10.0-0b27883407f7.zip`
 - Local working folder used during development: `/Users/gabby/Documents/Codex/2026-10-21/i-w/work/streakk-repository`
@@ -243,4 +243,4 @@ Package only after the working tree is clean and validation passes. Update `READ
 
 ## Immediate start prompt for the next assistant
 
-> Continue Streak from `Sankwan/streakk` branch `development`. Read `AGENTS.md`, `HANDOFF.md` and `docs/cape-coast-0.13.md`. Add deterministic low-cost trotro traffic to Cape Coast's marked traffic sector, then stronger race feedback before the offline LAN room. Preserve the versioned command/snapshot boundary and one shared Rapier world step per fixed tick. Validate all tests/routes/races/build plus browser playtests, use short commit messages, push validated milestones to `development`, and do not modify `main` without Gabriel's explicit agreement.
+> Continue Streak from `Sankwan/streakk` branch `development`. Read `AGENTS.md`, `HANDOFF.md` and `docs/trotro-run-0.14.md`. Add original layered race audio and stronger start/final-lap/close-rival feedback, then implement the first offline LAN lobby. Preserve protocol v2 and one shared Rapier world step per fixed tick. Validate all tests/routes/races/build plus browser playtests, use short commit messages, push validated milestones to `development`, and do not modify `main` without Gabriel's explicit agreement.

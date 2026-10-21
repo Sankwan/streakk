@@ -35,6 +35,7 @@ test('race snapshots are versioned JSON data with stable event IDs and no engine
  const snapshot=createRaceSnapshot(sim,31),copy=JSON.parse(encodeWireMessage(snapshot));
  assert.deepEqual(copy,snapshot);assert.equal(snapshot.protocol,PROTOCOL_VERSION);assert.equal(snapshot.sequence,31);assert.equal(snapshot.racers.length,4);assert.equal(snapshot.course.id,'tema-harbour');
  assert.equal(snapshot.racers[0].position.length,3);assert.equal(snapshot.racers[0].rotation.length,4);assert.ok(snapshot.events[0].id.startsWith(`${sim.raceEpoch}:${sim.ticks}:0:you:`));
+ assert.deepEqual(snapshot.traffic,[]);
  assert.equal('vehicle' in snapshot.racers[0],false);assert.equal('body' in snapshot.racers[0],false);assert.equal('world' in snapshot,false);
  const eventId=snapshot.events[0].id;sim.reset();sim.countdown=0;sim.player.inventory=['boost'];sim.tick({drive:EMPTY_INPUT,use:true});assert.notEqual(createRaceSnapshot(sim).events[0].id,eventId);
  world.free();
