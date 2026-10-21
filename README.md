@@ -1,6 +1,6 @@
 # Streak
 
-A browser arcade racer with Ghana taxi racecars, wide original circuits and compact power-ups. Three.js renders the game; Rapier handles the shared vehicle simulation. The current development milestone is **Trotro Run 0.14.0**: two deterministic oncoming trotros add a short traffic challenge to Cape Coast while preserving an open escape line.
+A browser arcade racer with Ghana taxi racecars, wide original circuits and compact power-ups. Three.js renders the game; Rapier handles the shared vehicle simulation. The current development milestone is **Race Energy 0.15.0**: original layered engine, wind and close-rival synthesis plus launch/final-lap cues and restrained speed feedback.
 
 ## Run from source
 
@@ -22,7 +22,7 @@ The Python launcher opens http://127.0.0.1:8768/. Keep its Terminal open. Source
 
 ## Controls
 
-WASD/arrows drive; Space drifts; E uses the selected item; Q swaps inventory slots; R restarts the pack; C changes camera; P/Escape pauses. Choose a circuit before starting. Sound starts muted. WATCH AI DEMO is labelled and can hand control back to the player. See [Trotro Run notes](docs/trotro-run-0.14.md) for the current changes and evidence.
+WASD/arrows drive; Space drifts; E uses the selected item; Q swaps inventory slots; R restarts the pack; C changes camera; P/Escape pauses. Choose a circuit before starting. Sound starts muted and remains optional. WATCH AI DEMO is labelled and can hand control back to the player. See [Race Energy notes](docs/race-energy-0.15.md) for the current changes and evidence.
 
 ## Branches and builds
 

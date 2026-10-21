@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {raceIntensity} from '../src/audio.ts';
+const base={speed:0,throttle:0,nearestRival:100,running:true,paused:false,finalLap:false,countdown:0};
+test('race intensity grows with speed, close rivals and final-lap pressure',()=>{const idle=raceIntensity(base),fast=raceIntensity({...base,speed:45}),close=raceIntensity({...base,speed:45,nearestRival:8}),final=raceIntensity({...base,speed:45,nearestRival:8,finalLap:true});assert.equal(idle,0);assert.ok(fast>idle);assert.ok(close>fast);assert.ok(final>close);assert.ok(final<=1);assert.equal(raceIntensity({...base,speed:54,paused:true}),0);assert.equal(raceIntensity({...base,speed:54,running:false}),0);});

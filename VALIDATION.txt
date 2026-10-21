@@ -1,10 +1,9 @@
-Streak Trotro Run 0.14 validation
+Streak Race Energy 0.15 validation
 Date: 2026-10-21
 
 npm test
-- 57 tests passed; 0 failed.
-- New coverage includes deterministic traffic schedules, route bounds, escape clearance,
-  AI avoidance, reset cleanup, protocol snapshots and all existing regressions.
+- 58 tests passed; 0 failed.
+- New coverage checks bounded race-intensity scaling, pause/mute state and all existing regressions.
 - Multi-car simulation still advances exactly one shared Rapier world step per tick.
 
 npm run test:routes
@@ -27,7 +26,7 @@ npm run build -- --configLoader runner
 - Shared Three.js/Rapier chunk remains about 1.86 MB gzip and needs later loading optimisation.
 
 Runtime availability check
-- The existing Vite server hot-reloads the Cape Coast 0.13 source for manual playtesting.
+- The existing Vite server hot-reloads the Race Energy 0.15 source for manual playtesting.
 - Protocol v2 includes traffic state; command validation, sequence rejection, reset-safe event IDs and multi-human command dispatch retain focused coverage.
 - Interactive computer/browser control was disabled in Work settings, so this run could
   not repeat the earlier manual driving, camera-comfort and live FPS inspection.
