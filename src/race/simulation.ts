@@ -15,8 +15,11 @@ export interface Racer {
 }
 export const MAGNET={duration:5.5,ahead:58,halfLength:12,widthFraction:.56,pullPerTick:.075,slowPerTick:.035,driveScale:.58};
 export interface MagnetField {id:string;ownerId:string;s:number;position:Vector3;right:Vector3;halfWidth:number;halfLength:number;expiresAt:number;}
+export const MINE={capacity:8,armDelay:.55,lifetime:14,triggerRadius:2.15,damage:24,hitDuration:1.05,maxSpeedLoss:5};
+export interface Mine {id:string;ownerId:string;s:number;position:Vector3;placedAt:number;armedAt:number;expiresAt:number;}
+export interface MineBurst {mineId:string;ownerId:string;targetId:string|null;position:Vector3;at:number;result:'hit'|'shield'|'protected'|'expired';}
 const signedGap=(from:number,to:number,length:number)=>{let gap=to-from;if(gap>length/2)gap-=length;if(gap< -length/2)gap+=length;return gap;};
-export function chooseAILane(racer:Racer,course:Course,racers:Iterable<Racer>,fields:MagnetField[]){
+export function chooseAILane(racer:Racer,course:Course,racers:Iterable<Racer>,fields:MagnetField[],mines:Mine[]=[]){
  const here=course.sample(racer.s),margin=4,extent=Math.max(1,here.width/2-margin);
  const candidates=course.definition.lanes>=4?[-.9,-.3,.3,.9].map(n=>n*extent):[-.62,.62].map(n=>n*extent);
  let best=candidates[0],bestScore=Infinity;
@@ -24,6 +27,7 @@ export function chooseAILane(racer:Racer,course:Course,racers:Iterable<Racer>,fi
   let score=Math.abs(lane-here.width*racer.laneBias)*.16;
   for(const other of racers){if(other.id===racer.id||other.finishTime!==null||other.wreckUntil>0)continue;const gap=signedGap(racer.s,other.s,course.length);if(gap< -8||gap>36)continue;const lateral=course.project(other.vehicle.currentPosition,other.s).lateral,overlap=Math.max(0,1-Math.abs(lateral-lane)/4.2);if(!overlap)continue;score+=overlap*(Math.abs(gap)<8?70:26*(1-gap/36));}
   for(const field of fields){const gap=signedGap(racer.s,field.s,course.length);if(gap>=-field.halfLength&&gap<90&&Math.abs(lane)<field.halfWidth+.8)score+=32;}
+  for(const mine of mines){if(mine.ownerId===racer.id)continue;const gap=signedGap(racer.s,mine.s,course.length);if(gap<0||gap>65)continue;const lateral=course.project(mine.position,mine.s).lateral,overlap=Math.max(0,1-Math.abs(lateral-lane)/3.1);score+=overlap*48*(1-gap/80);}
   score+=Math.abs(lane-racer.aiLane)*.08;
   if(score<bestScore-1e-6){best=lane;bestScore=score;}
  }
@@ -36,6 +40,7 @@ export class RaceSimulation {
  readonly racers=new Map<string,Racer>();
  readonly projectiles=new ProjectileSystem();
  magnetFields:MagnetField[]=[];
+ mines:Mine[]=[];mineBursts:MineBurst[]=[];
  combatImpacts:CombatImpact[]=[];
  course:Course;pickups:Pickup[]=[];time=0;countdown=3;ticks=0;events:RaceEvent[]=[];
  readonly targetLaps=2;
@@ -55,7 +60,7 @@ export class RaceSimulation {
  }
  get player(){return this.racers.get('you')!;}
  reset(course=this.course){
-  this.projectiles.reset();this.magnetFields=[];this.combatImpacts=[];this.course=course;this.time=0;this.countdown=3;this.ticks=0;this.events=[];this.pickups=makePickups(course);
+  this.projectiles.reset();this.magnetFields=[];this.mines=[];this.mineBursts=[];this.combatImpacts=[];this.course=course;this.time=0;this.countdown=3;this.ticks=0;this.events=[];this.pickups=makePickups(course);
   for(const racer of this.racers.values()){
    const s=course.length*course.definition.spawnFraction+racer.gridIndex*8,p=course.sample(s);
    const lane=MathUtils.clamp(p.width*racer.laneBias,-p.width/2+4,p.width/2-4);racer.aiLane=lane;racer.laneDecisionAt=0;
@@ -78,6 +83,7 @@ export class RaceSimulation {
    if(!this.firePulse(racer)){this.emit('notice',racer,'Pulse recharging · item retained');return false;}
   }
   if(kind==='magnet')this.deployMagnet(racer);
+  if(kind==='mine')this.deployMine(racer);
   racer.inventory.shift();this.emit(kind==='pulse'?'fire':'use',racer,PICKUP_NAMES[kind]+(kind==='pulse'?' fired':' activated'));return true;
  }
  damage(racer:Racer,amount:number,at=this.time){
@@ -113,6 +119,21 @@ export class RaceSimulation {
  private deployMagnet(racer:Racer){
   const leader=this.standings().find(r=>r.finishTime===null)??racer,p=this.course.sample(leader.s+MAGNET.ahead);
   this.magnetFields=[{id:`magnet-${this.ticks}-${racer.id}`,ownerId:racer.id,s:p.s,position:p.position.clone(),right:p.right.clone(),halfWidth:p.width*MAGNET.widthFraction/2,halfLength:MAGNET.halfLength,expiresAt:this.time+MAGNET.duration}];
+ }
+ private deployMine(racer:Racer){
+  const forward=new Vector3(0,0,-1).applyQuaternion(racer.vehicle.currentRotation),candidate=racer.vehicle.currentPosition.clone().addScaledVector(forward,-3.1),road=this.course.project(candidate,racer.s),sample=this.course.sample(road.s);
+  const lateral=MathUtils.clamp(road.lateral,-sample.width/2+3,sample.width/2-3),position=sample.position.clone().addScaledVector(sample.right,lateral).setY(.12);
+  this.mines.push({id:`mine-${this.ticks}-${racer.id}`,ownerId:racer.id,s:sample.s,position,placedAt:this.time,armedAt:this.time+MINE.armDelay,expiresAt:this.time+MINE.lifetime});if(this.mines.length>MINE.capacity)this.mines.shift();
+ }
+ private updateMines(){
+  const remaining:Mine[]=[];
+  for(const mine of this.mines){
+   if(mine.expiresAt<=this.time){this.mineBursts.push({mineId:mine.id,ownerId:mine.ownerId,targetId:null,position:mine.position.clone(),at:this.time,result:'expired'});continue;}
+   let target:Racer|undefined;if(mine.armedAt<=this.time)for(const racer of this.racers.values()){if(racer.id===mine.ownerId||racer.finishTime!==null||racer.wreckUntil>this.time)continue;const dx=racer.vehicle.currentPosition.x-mine.position.x,dz=racer.vehicle.currentPosition.z-mine.position.z;if(dx*dx+dz*dz<=MINE.triggerRadius*MINE.triggerRadius){target=racer;break;}}
+   if(!target){remaining.push(mine);continue;}
+   const shielded=target.shieldUntil>this.time,damaged=this.damage(target,MINE.damage);if(damaged){target.hitUntil=Math.max(target.hitUntil,this.time+MINE.hitDuration);target.lastHitBy=mine.ownerId;const velocity=new Vector3().copy(target.vehicle.body.linvel()).setY(0),loss=Math.min(MINE.maxSpeedLoss,velocity.length()*.12);if(loss>0)target.vehicle.body.applyImpulse(velocity.normalize().multiplyScalar(-target.vehicle.mass*loss),true);const owner=this.racers.get(mine.ownerId);if(owner){owner.hits++;this.emit('hit',owner,'MINE HIT · '+target.name+' −'+MINE.damage);}this.emit('hit',target,(this.racers.get(mine.ownerId)?.name??'RIVAL')+' mine hit you · '+Math.round(target.health)+'% condition');}
+   this.mineBursts.push({mineId:mine.id,ownerId:mine.ownerId,targetId:target.id,position:mine.position.clone(),at:this.time,result:damaged?'hit':shielded?'shield':'protected'});
+  }this.mines=remaining;
  }
  private fieldFor(racer:Racer){
   const p=this.course.project(racer.vehicle.currentPosition,racer.s),half=this.course.length/2;
@@ -160,7 +181,7 @@ export class RaceSimulation {
   }
  }
  tick(command:Command){
-  this.events=[];this.combatImpacts=[];
+  this.events=[];this.combatImpacts=[];this.mineBursts=[];
   if(this.countdown>0){this.countdown=Math.max(0,this.countdown-STEP);return;}
   this.time+=STEP;this.ticks++;
   this.magnetFields=this.magnetFields.filter(field=>field.expiresAt>this.time);
@@ -171,11 +192,11 @@ export class RaceSimulation {
    const vehicle=racer.vehicle,p=this.course.project(vehicle.currentPosition,racer.s);racer.s=p.s;vehicle.offroad=p.distance>p.width/2-.15;
    if(racer.isAI&&racer.inventory.length){
     const ahead=this.course.sample(racer.s+60);
-    const slot=racer.inventory.findIndex(kind=>kind==='pulse'?this.canHitPulse(racer):kind==='magnet'?this.standings()[0]?.id!==racer.id:kind==='repair'?racer.health<75:kind==='boost'?ahead.forward.dot(this.course.sample(racer.s).forward)>.98:vehicle.currentPosition.distanceTo(this.player.vehicle.currentPosition)<15);
+    const slot=racer.inventory.findIndex(kind=>kind==='pulse'?this.canHitPulse(racer):kind==='magnet'?this.standings()[0]?.id!==racer.id:kind==='mine'?this.standings().some(other=>other.id!==racer.id&&signedGap(other.s,racer.s,this.course.length)>0&&signedGap(other.s,racer.s,this.course.length)<20):kind==='repair'?racer.health<75:kind==='boost'?ahead.forward.dot(this.course.sample(racer.s).forward)>.98:vehicle.currentPosition.distanceTo(this.player.vehicle.currentPosition)<15);
     if(slot>=0){if(slot===1)racer.inventory.reverse();this.use(racer);}
    }
    else if(racer.id===this.player.id&&command.use)this.use(racer);
-   if(racer.isAI&&racer.laneDecisionAt<=this.time){racer.aiLane=chooseAILane(racer,this.course,this.racers.values(),this.magnetFields);racer.laneDecisionAt=this.time+.45;}
+   if(racer.isAI&&racer.laneDecisionAt<=this.time){racer.aiLane=chooseAILane(racer,this.course,this.racers.values(),this.magnetFields,this.mines);racer.laneDecisionAt=this.time+.45;}
    vehicle.boostActive=racer.boostUntil>this.time;
    let drive=racer.finishTime!==null||racer.wreckUntil>this.time?{...EMPTY_INPUT,brake:vehicle.forwardSpeed>1?1:0}:racer.isAI?driveAI(vehicle,this.course,racer.s,racer.aiLane):command.drive;
    const magnetic=this.fieldFor(racer);if(magnetic){
@@ -189,6 +210,7 @@ export class RaceSimulation {
   // All forces have been submitted. Every car sees the same world time.
   this.world.step();
   for(const racer of this.racers.values())racer.vehicle.capture();
+  this.updateMines();
   for(const impact of this.projectiles.advance(this.world,this.time,STEP,this.projectileTargets(),this.racerHandles()))this.applyProjectile(impact);
   this.updateLocks();
   for(const racer of this.racers.values()){

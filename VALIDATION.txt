@@ -1,36 +1,37 @@
-Streak Handling Pass 0.9 validation
+Streak Combat Roads 0.10 validation
 Date: 2026-10-21
 
 npm test
-- 45 tests passed; 0 failed.
-- Includes four stable racer identities/grid slots, exactly one shared world step,
-  lane-aware overtaking, magnetic outside-line avoidance, target switching,
-  incoming warnings, guided collision, progressive/self-centring steering,
-  speed-sensitive lock, low-bounce contact tuning and prior regressions.
+- 48 tests passed; 0 failed.
+- New coverage includes mine arming, owner immunity, bounded disruption, shield
+  absorption, capacity/reset behavior, Accra Ring geometry and all prior regressions.
+- Multi-car simulation still advances exactly one shared Rapier world step per tick.
 
 npm run test:routes
-- North Loop finished: 30.15 s, 0 off-road ticks.
-- Tema Harbour finished: 113.47 s, 0 off-road ticks.
+- North Loop finished: 30.15 s, max lateral 8.84 m, 0 off-road ticks.
+- Tema Harbour finished: 113.47 s, max lateral 5.71 m, 0 off-road ticks.
+- Accra Ring finished: 94.03 s, max lateral 2.31 m, 0 off-road ticks.
 
 npm run test:race
-- All four racers completed two laps on both tracks.
-- 0 recoveries and 0 off-road ticks on both tracks.
-- North produced 2 guided pulse hits; Tema produced 4 magnetic deployments and 2 hits.
+- All four racers completed two laps on all three tracks.
+- 0 recoveries and 0 off-road ticks on every track.
 - Maximum dynamic bodies: 4; projectiles: 1; magnetic fields: 1.
 
 npm run build -- --configLoader runner
 - TypeScript and Vite production build passed.
+- Game entry chunk: 32.03 kB minified / 13.34 kB gzip.
 - Shared Three.js/Rapier chunk remains about 1.86 MB gzip and needs later loading optimisation.
 
-Browser check · current desktop · assisted Tema demo
-- All four race entries, three rivals/minimap markers and distinct taxi liveries displayed.
-- Automatic graphics held 60 FPS at 1.35× render scale.
-- Full-pack sample: 17.4 ms p95 / 16.7 ms median, 126 draw calls, 557k triangles.
-- Handling pass manual-drive sample: 17.5 ms p95 / 16.7 ms median at 1.35×;
-  steering built progressively, released cleanly and the camera recovered without a cut.
-- No visible runtime error panel appeared.
+Runtime availability check
+- The existing Vite server returned HTTP 200 and served the Combat Roads 0.10 page.
+- Interactive computer/browser control was disabled in Work settings, so this run could
+  not repeat the earlier manual driving, camera-comfort and live FPS inspection.
+
+Previously established desktop reference
+- Automatic graphics held 60 FPS at 1.35x render scale on the test machine.
+- Handling sample: 17.5 ms p95 / 16.7 ms median, 87 draw calls and 274k triangles.
 
 Limits
-- Assisted demo is not a human handling test.
-- One desktop sample does not qualify mobile or lower-end hardware.
-- LAN, voice, online matchmaking and the requested mine are not implemented.
+- Automated AI completion is not a human handling or camera-comfort test.
+- One desktop reference does not qualify mobile or lower-end hardware.
+- Offline LAN, voice and internet matchmaking remain future milestones.

@@ -25,6 +25,8 @@ Repository policy is recorded in AGENTS.md. Server-enforced protection is a sepa
 
 ## Current evidence and limitations
 
+Combat Roads 0.10 adds the velocity-aware/impact-responsive camera, compact rear mines with AI avoidance, rate-limited hit feedback, and Accra Ring Night Run. Forty-eight local tests pass. Standalone controllers and every four-car pack complete all three tracks with zero off-road ticks or recoveries. The production build passes; interactive browser control was unavailable for this validation run, so camera comfort, mine readability and current live performance still need a human browser playtest before promotion.
+
 Handling Pass 0.9 smooths digital steering and pedals, adds stronger speed-sensitive steering lock, biases grip toward stable mild understeer, lowers chassis bounce/friction for pack contact, and smooths both chase heading and look target. Forty-five local tests pass. Both route checks stay on-road and every racer completes both four-car races without a recovery. This remains an automated/assisted check pending hands-on tuning on more hardware.
 
 Pack Racing 0.8 runs YOU, KOJO, AMA and MENSAH in one shared Rapier world. AI racers reassess four legal lanes, pass a slower car and choose the narrow outside escape lines when a magnetic field lies ahead. Forty-three local tests pass. Both four-car/two-lap checks finish without recoveries or off-road ticks; Tema exercises six magnetic fields and three guided hits. A local browser run displayed all four markers/cars and held 60 FPS at 1.35× render scale with 17.4 ms p95 frame interval, 126 draw calls and 557k triangles on the current desktop. This single-machine assisted run is not mobile qualification or a human handling test.

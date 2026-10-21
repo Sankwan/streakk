@@ -1,6 +1,6 @@
 # Streak
 
-A browser arcade racer with Ghana taxi racecars, wide original circuits and compact power-ups. Three.js renders the game; Rapier handles the shared vehicle simulation. The current development milestone is **Handling Pass 0.9.0**: smoother steering/pedals and chase camera, calmer contact response, plus the four-racer pack and combat systems from 0.8.
+A browser arcade racer with Ghana taxi racecars, wide original circuits and compact power-ups. Three.js renders the game; Rapier handles the shared vehicle simulation. The current development milestone is **Combat Roads 0.10.0**: a more expressive chase camera, rear mines, clearer impact feedback, and the new Accra Ring Night Run.
 
 ## Run from source
 
@@ -22,7 +22,7 @@ The Python launcher opens http://127.0.0.1:8768/. Keep its Terminal open. Source
 
 ## Controls
 
-WASD/arrows drive; Space drifts; E uses the selected item; Q swaps inventory slots; R restarts the pack; C changes camera; P/Escape pauses. Choose a circuit before starting. Sound starts muted. WATCH AI DEMO is labelled and can hand control back to the player. See [Handling Pass notes](docs/handling-pass-0.9.md) for the current control changes and evidence.
+WASD/arrows drive; Space drifts; E uses the selected item; Q swaps inventory slots; R restarts the pack; C changes camera; P/Escape pauses. Choose a circuit before starting. Sound starts muted. WATCH AI DEMO is labelled and can hand control back to the player. See [Combat Roads notes](docs/combat-roads-0.10.md) for the current changes and evidence.
 
 ## Branches and builds
 
@@ -49,11 +49,13 @@ Collect the coral pulse icon and the game locks the most directly-ahead visible 
 
 The purple magnet pickup projects a short field ahead of the race leader. Its central strip pulls racers toward the centre and reduces drive briefly, while both outer road edges remain open escape lines. It is visual and non-solid. See [Target Lock notes](docs/target-lock-0.7.md).
 
+The orange mine drops behind the taxi, arms after a short delay and occupies only a compact part of one racing line. It expires automatically, cannot hit its owner, is absorbed by shields, and causes bounded damage and speed loss without forcing a spin. AI racers include armed mines in their lane choice.
+
 The [combat lab](audit/combat.html) supplies reproducible clear-hit, shield, barrier and crossing-target checks through the same simulation and visuals. With the local launcher running, open `/audit/combat.html`.
 
 ## Next milestone
 
-The complete continuation brief is in [HANDOFF.md](HANDOFF.md). The next tested batch covers camera feel, a compact rear mine, clearer impact feedback, and a third original Ghana-inspired track. Offline LAN, optional voice and online parties/matchmaking follow after the common local race loop is stable.
+The complete continuation brief is in [HANDOFF.md](HANDOFF.md). The next major milestone is the fully offline LAN slice: host-authoritative 2–4 player rooms on one network, followed later by online parties/matchmaking and optional voice.
 
 ## Credits
 

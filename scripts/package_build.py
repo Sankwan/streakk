@@ -19,7 +19,7 @@ output = root / 'artifacts' / (name + '.zip')
 output.parent.mkdir(exist_ok=True)
 files = ['.github', '.gitignore', '.nvmrc', 'audit', 'src', 'tests', 'tools', 'scripts', 'docs', 'dist', '.ci-results',
          'index.html', 'vite.config.ts', 'package.json', 'package-lock.json', 'tsconfig.json',
-         'README.md', 'AGENTS.md', 'THIRD_PARTY_NOTICES.txt', 'VALIDATION.txt',
+         'README.md', 'HANDOFF.md', 'AGENTS.md', 'THIRD_PARTY_NOTICES.txt', 'VALIDATION.txt',
          'route-checks.json', 'serve.py', 'Start Streak Race.command']
 with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as archive:
     for entry in files:

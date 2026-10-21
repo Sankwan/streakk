@@ -8,8 +8,8 @@ This document is the working brief for continuing Streak in Claude or another Co
 
 - Repository: `https://github.com/Sankwan/streakk`
 - Continue on: `development`
-- Current validated development commit: `9e58534939f38e346c10d2e7e727200c0fe58b16`
-- Commit message: `Add handling pass`
+- Previous validated development commit: `9e58534939f38e346c10d2e7e727200c0fe58b16`
+- Current source milestone: Combat Roads 0.10.0 (camera, mine, impact feedback and third track)
 - Current release baseline on `main`: `6383aa6c6502967c57843a2822eadad7b3ba2a0e`
 - Current packaged build: `artifacts/Streak-v0.9.0-dbc16dcfe995.zip`
 - Local working folder used during development: `/Users/gabby/Documents/Codex/2026-10-21/i-w/work/streakk-repository`
@@ -39,7 +39,7 @@ Version 0.9 includes:
 - Smoother digital steering, speed-sensitive steering lock, pedal smoothing, restrained collider bounce, and improved slide recovery.
 - Four racers: YOU, KOJO, AMA, and MENSAH, with distinct Ghana taxi-inspired colors.
 - Lane-aware AI overtaking and magnetic-field avoidance.
-- Two tracks: North Loop and Tema Harbour Run.
+- Three tracks: North Loop, Tema Harbour Run and Accra Ring Night Run.
 - Wide, width-aware road geometry, lane markings, barriers, pickup placement, minimap, and lap validation.
 - Two-slot inventory with boost, repair, shield, pulse, and magnet pickups.
 - Automatic pulse target lock, automatic lock switching to the most directly-ahead racer, guided projectile flight, obstruction checks, target reticle, and warning shown to the targeted racer.
@@ -234,4 +234,4 @@ Package only after the working tree is clean and validation passes. Update `READ
 
 ## Immediate start prompt for the next assistant
 
-> Continue Streak from `Sankwan/streakk` branch `development` at commit `9e58534939f38e346c10d2e7e727200c0fe58b16`. Read `AGENTS.md` and `HANDOFF.md`. Implement the next four-iteration batch in order: camera feel, rear mine, impact feedback, and Accra Ring Night Run. Keep one shared Rapier world step per fixed tick, use original assets/code, validate all tests/routes/races/build plus a browser playtest, use short commit messages, push the validated milestone to `development`, and do not modify `main` without Gabriel's explicit agreement.
+> Continue Streak from `Sankwan/streakk` branch `development`. Read `AGENTS.md`, `HANDOFF.md` and `docs/combat-roads-0.10.md`. Begin the offline LAN milestone with a host-authoritative 2–4 player room slice while preserving the local single-player loop and one shared Rapier world step per fixed tick. Validate all tests/routes/races/build plus browser playtests, use short commit messages, push validated milestones to `development`, and do not modify `main` without Gabriel's explicit agreement.

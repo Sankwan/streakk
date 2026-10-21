@@ -21,8 +21,8 @@ test('render budget lowers resolution under sustained load and recovers conserva
  const scale=budget.scale;budget.reset();for(let i=0;i<500;i++)budget.observe(Infinity);assert.equal(budget.scale,scale);
  assert.equal(percentile([12,60,16,20],.95),60);
 });
-test('adapted shopfront footprints keep a usable margin from either circuit',()=>{
- for(const id of ['tema-harbour','north-loop']){const course=createCourse(id),sites=facadeSites(course);assert.ok(sites.length>0&&sites.length<70);
+test('adapted shopfront footprints keep a usable margin from every circuit',()=>{
+ for(const id of ['tema-harbour','north-loop','accra-ring']){const course=createCourse(id),sites=facadeSites(course);assert.ok(sites.length>0&&sites.length<70);
   for(const site of sites)for(const along of [-site.hw-2,0,site.hw+2])for(const across of [-site.hd-2,0,site.hd+2]){
    const pos={x:site.x+site.ax*along-site.az*across,z:site.z+site.az*along+site.ax*across};
    const q=course.project(pos);assert.ok(q.distance>=q.width/2+4.99);

@@ -1,8 +1,8 @@
 // Headless single-car route feasibility check. This is a test driver, not production opponent AI.
 import RAPIER from '@dimforge/rapier3d-compat';import * as THREE from 'three';
-import {createCourse,addPhysics} from '../src/track.ts';import {Vehicle} from '../src/vehicle.ts';import {LapProgress} from '../src/tracks/lap.ts';
+import {createCourse,addPhysics} from '../src/track.ts';import {Vehicle} from '../src/vehicle.ts';import {LapProgress} from '../src/tracks/lap.ts';import {TRACKS} from '../src/tracks/definitions.ts';
 await RAPIER.init();const results=[];
-for(const id of ['north-loop','tema-harbour']){
+for(const {id} of TRACKS){
  const track=createCourse(id),world=new RAPIER.World({x:0,y:-9.81,z:0});world.timestep=1/60;addPhysics(world,track);world.step();const car=new Vehicle(world);car.setSpawn(track.spawn,track.rotation);const laps=new LapProgress();let s=track.length*track.definition.spawnFraction,maxLateral=0,finished=false,ticks=0,offroad=0;
  for(;ticks<60*280;ticks++){
   const p=track.project(car.currentPosition,s);s=p.s;

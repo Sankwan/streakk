@@ -16,4 +16,10 @@ export const TEMA_HARBOUR:TrackDefinition={
  points:[[-340,220,32],[-80,220,34],[240,220,34],[370,145,30],[380,-70,28],[230,-165,26],[60,-165,24],[-30,-270,24],[-260,-265,26],[-380,-145,28],[-365,30,32]].map(([x,z,width])=>({x:x*1.2,z:z*1.2,width})),
  lanes:4,sampleSpacing:3,tension:.5,arcDivisions:4096,spawnFraction:.008,theme:'harbour',seed:71,
 };
-export const TRACKS=[NORTH_LOOP,TEMA_HARBOUR];
+export const ACCRA_RING:TrackDefinition={
+ id:'accra-ring',version:1,name:'Accra Ring Night Run',subtitle:'Dusk city circuit',
+ description:'A fictional ring-road sprint with a broad combat straight, long sweepers and a tighter market-side sector.',
+ points:[[-390,130,36],[-145,220,36],[150,225,34],[360,120,34],[420,-80,32],[300,-245,30],[70,-305,28],[-135,-285,28],[-315,-195,30],[-425,-30,32]].map(([x,z,width])=>({x,z,width})),
+ lanes:4,sampleSpacing:3,tension:.48,arcDivisions:4096,spawnFraction:.01,theme:'harbour',seed:104,
+};
+export const TRACKS=[NORTH_LOOP,TEMA_HARBOUR,ACCRA_RING];

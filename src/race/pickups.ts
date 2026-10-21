@@ -1,10 +1,10 @@
 import {Vector3,MathUtils} from 'three';
 import type {Course} from '../tracks/compiler.ts';
-export type PickupKind='boost'|'repair'|'shield'|'pulse'|'magnet';
+export type PickupKind='boost'|'repair'|'shield'|'pulse'|'magnet'|'mine';
 export interface Pickup {id:string;kind:PickupKind;s:number;lateral:number;position:Vector3;availableAt:number;}
-export const PICKUP_NAMES:Record<PickupKind,string>={boost:'BOOST',repair:'REPAIR',shield:'SHIELD',pulse:'PULSE',magnet:'MAGNET'};
+export const PICKUP_NAMES:Record<PickupKind,string>={boost:'BOOST',repair:'REPAIR',shield:'SHIELD',pulse:'PULSE',magnet:'MAGNET',mine:'MINE'};
 export function makePickups(course:Course):Pickup[]{
- const kinds:PickupKind[]=['pulse','boost','magnet','repair','shield'];
+ const kinds:PickupKind[]=['pulse','boost','mine','magnet','repair','shield'];
  return course.pickupOpportunities.flatMap((site,i)=>{
   const p=course.sample(site.s),offset=Math.min(3.2,site.width/2-4);
   return [-offset,offset].map((lateral,lane)=>({id:`${course.definition.id}:v${course.definition.version}:${i}:${lane}`,kind:kinds[(i+lane)%kinds.length],s:site.s,lateral,position:p.position.clone().addScaledVector(p.right,lateral).setY(.85),availableAt:0}));

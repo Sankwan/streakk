@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import RAPIER from '@dimforge/rapier3d-compat';
 import {Vector3,Quaternion} from 'three';
 import {ProjectileSystem,PULSE,selectLockTarget,sweepMovingBox,type ProjectileTarget} from '../src/race/projectiles.ts';
-import {MAGNET,RaceSimulation} from '../src/race/simulation.ts';
+import {MAGNET,MINE,RaceSimulation} from '../src/race/simulation.ts';
 import {createCourse} from '../src/track.ts';
 import {EMPTY_INPUT} from '../src/vehicle.ts';
 await RAPIER.init();
@@ -48,6 +48,17 @@ test('magnet projects ahead of the leader, leaves escape lanes, and affects only
  const field=sim.magnetFields[0],sample=sim.course.sample(field.s);assert.ok(field.halfWidth<sample.width/2-3);assert.equal(field.expiresAt,sim.time+MAGNET.duration);
  kojo.vehicle.setSpawn(sample.position.clone().addScaledVector(sample.right,field.halfWidth-.5).setY(.85),new Quaternion());world.step();kojo.vehicle.capture();sim.tick({drive:EMPTY_INPUT});assert.ok(kojo.magnetUntil>sim.time);
  const outside=sample.position.clone().addScaledVector(sample.right,field.halfWidth+1).setY(.85);kojo.vehicle.setSpawn(outside,new Quaternion());world.step();kojo.vehicle.capture();kojo.magnetUntil=0;sim.tick({drive:EMPTY_INPUT});assert.equal(kojo.magnetUntil,0);world.free();
+});
+test('rear mine arms late, ignores its owner, hits once and applies bounded disruption',()=>{
+ const world=new RAPIER.World({x:0,y:0,z:0}),sim=new RaceSimulation(world,createCourse('tema-harbour')),owner=sim.player,victim=sim.racers.get('kojo')!;sim.countdown=0;victim.isAI=false;for(const r of sim.racers.values())if(r!==owner&&r!==victim)r.finishTime=0;
+ owner.inventory=['mine'];assert.ok(sim.use(owner));assert.equal(sim.mines.length,1);const mine=sim.mines[0];assert.equal(mine.armedAt,MINE.armDelay);assert.equal(mine.expiresAt,MINE.lifetime);owner.vehicle.setSpawn(mine.position.clone().setY(.85),new Quaternion());victim.vehicle.setSpawn(mine.position.clone().add(new Vector3(0,0,6)).setY(.85),new Quaternion());world.step();
+ for(let i=0;i<40;i++)sim.tick({drive:EMPTY_INPUT});assert.equal(sim.mines.length,1,'the armed mine remains owner-safe');owner.vehicle.setSpawn(mine.position.clone().add(new Vector3(0,0,-10)).setY(.85),new Quaternion());
+ victim.vehicle.setSpawn(mine.position.clone().setY(.85),new Quaternion());victim.vehicle.body.setLinvel({x:0,y:0,z:-20},true);world.step();for(let i=0;i<30&&sim.mines.length;i++)sim.tick({drive:EMPTY_INPUT});assert.equal(sim.mines.length,0);assert.equal(victim.health,100-MINE.damage);assert.equal(owner.hits,1);assert.ok(sim.mineBursts.some(e=>e.result==='hit'));assert.ok(Math.abs(victim.vehicle.body.linvel().z)>=15-.25);world.free();
+});
+test('mine capacity, shield absorption and reset are deterministic',()=>{
+ const world=new RAPIER.World({x:0,y:0,z:0}),sim=new RaceSimulation(world,createCourse('tema-harbour')),owner=sim.player,victim=sim.racers.get('kojo')!;sim.countdown=0;
+ for(let i=0;i<MINE.capacity+2;i++){owner.inventory=['mine'];assert.ok(sim.use(owner));}assert.equal(sim.mines.length,MINE.capacity);
+ const mine=sim.mines.at(-1)!;sim.time=mine.armedAt;victim.shieldUntil=sim.time+2;victim.vehicle.setSpawn(mine.position.clone().setY(.85),new Quaternion());world.step();sim.tick({drive:EMPTY_INPUT});assert.equal(victim.health,100);assert.ok(sim.mineBursts.some(e=>e.result==='shield'));sim.reset();assert.equal(sim.mines.length,0);assert.equal(sim.mineBursts.length,0);world.free();
 });
 test('real shared simulation consumes one charge, attributes one hit, and never damages the owner',()=>{
  const {world,sim,shooter,victim,impacts}=runShot();

@@ -19,9 +19,9 @@ export function buildRoadGeometry(course:Course,from:(width:number)=>number,to:(
 }
 const material=(color:number,roughness=.85)=>new THREE.MeshStandardMaterial({color,roughness,side:THREE.DoubleSide});
 export function buildEnvironment(group:THREE.Group,course:Course){
- const harbour=course.definition.theme==='harbour',size=course.bounds.getSize(new THREE.Vector3()),center=course.bounds.getCenter(new THREE.Vector3());
- const ground=new THREE.Mesh(new THREE.PlaneGeometry(size.x+160,size.z+160),material(harbour?0x777b70:0x17282b));ground.rotation.x=-Math.PI/2;ground.position.set(center.x,-.03,center.z);ground.receiveShadow=true;group.add(ground);
- const road=new THREE.Mesh(buildRoadGeometry(course,w=>-w/2,w=>w/2,.012),material(harbour?0x424b4d:0x303b40));road.receiveShadow=true;group.add(road);
+ const harbour=course.definition.theme==='harbour',night=course.definition.id==='accra-ring',size=course.bounds.getSize(new THREE.Vector3()),center=course.bounds.getCenter(new THREE.Vector3());
+ const ground=new THREE.Mesh(new THREE.PlaneGeometry(size.x+160,size.z+160),material(night?0x263431:harbour?0x777b70:0x17282b));ground.rotation.x=-Math.PI/2;ground.position.set(center.x,-.03,center.z);ground.receiveShadow=true;group.add(ground);
+ const road=new THREE.Mesh(buildRoadGeometry(course,w=>-w/2,w=>w/2,.012),material(night?0x293338:harbour?0x424b4d:0x303b40));road.receiveShadow=true;group.add(road);
  for(const sign of [-1,1]){group.add(new THREE.Mesh(buildRoadGeometry(course,w=>sign*(w/2-.18),w=>sign*(w/2-.32),.025),material(0xd4d4be)));group.add(new THREE.Mesh(buildRoadGeometry(course,w=>sign*(w/2+.2),w=>sign*(w/2+.8),.016),material(0x939a8b)));}
  const barriers=new THREE.InstancedMesh(new THREE.BoxGeometry(.6,1.1,1),material(0x9aafa6),course.road.length*2),o=new THREE.Object3D();let n=0;
  for(let i=0;i<course.road.length;i++)for(const sign of [-1,1]){const a=roadEdge(course,i,sign,.6),b=roadEdge(course,(i+1)%course.road.length,sign,.6),delta=b.clone().sub(a);o.position.copy(a).add(b).multiplyScalar(.5);o.position.y=.55;o.rotation.set(0,Math.atan2(delta.x,delta.z),0);o.scale.set(1,1,delta.length()+.15);o.updateMatrix();barriers.setMatrixAt(n,o.matrix);barriers.setColorAt(n++,new THREE.Color(Math.floor(i*course.step/14)%5===0?(harbour?0xc0a46f:0xc8ec4b):0x85918a));}
