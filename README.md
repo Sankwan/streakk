@@ -1,6 +1,6 @@
 # Streak
 
-A browser arcade racer with Ghana taxi racecars, wide original circuits and compact power-ups. Three.js renders the game; Rapier handles the shared vehicle simulation. The current development milestone is **Rush Pack 0.12.0**: faster predictive rival pacing on the full circuits, restrained catch-up assistance, shared slipstreaming, and corrected finished-racer lifecycle behavior.
+A browser arcade racer with Ghana taxi racecars, wide original circuits and compact power-ups. Three.js renders the game; Rapier handles the shared vehicle simulation. The current development milestone is **Cape Coast 0.13.0**: a fourth original circuit that moves from a broad boulevard through coastal sweepers, town streets and a brief market squeeze.
 
 ## Run from source
 
@@ -22,7 +22,7 @@ The Python launcher opens http://127.0.0.1:8768/. Keep its Terminal open. Source
 
 ## Controls
 
-WASD/arrows drive; Space drifts; E uses the selected item; Q swaps inventory slots; R restarts the pack; C changes camera; P/Escape pauses. Choose a circuit before starting. Sound starts muted. WATCH AI DEMO is labelled and can hand control back to the player. See [Rush Pack notes](docs/rush-pack-0.12.md) for the current changes and evidence.
+WASD/arrows drive; Space drifts; E uses the selected item; Q swaps inventory slots; R restarts the pack; C changes camera; P/Escape pauses. Choose a circuit before starting. Sound starts muted. WATCH AI DEMO is labelled and can hand control back to the player. See [Cape Coast notes](docs/cape-coast-0.13.md) for the current changes and evidence.
 
 ## Branches and builds
 

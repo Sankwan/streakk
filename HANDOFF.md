@@ -8,8 +8,8 @@ This document is the working brief for continuing Streak in Claude or another Co
 
 - Repository: `https://github.com/Sankwan/streakk`
 - Continue on: `development`
-- Previous validated development commit: `0b27883407f788b30102a06f7924038e6443fd70`
-- Current source milestone: Rush Pack 0.12.0 (predictive rival pace, catch-up and slipstream)
+- Current validated development head: see the remote `development` branch and verify it before changing history.
+- Current source milestone: Cape Coast 0.13.0 (mixed boulevard, coast, town and market-squeeze route)
 - Current release baseline on `main`: `6383aa6c6502967c57843a2822eadad7b3ba2a0e`
 - Current packaged build: `artifacts/Streak-v0.10.0-0b27883407f7.zip`
 - Local working folder used during development: `/Users/gabby/Documents/Codex/2026-10-21/i-w/work/streakk-repository`
@@ -33,13 +33,13 @@ Do not ship Blur assets, code, audio, names, or trademarks. Reverse-engineering 
 
 ## What is implemented
 
-Version 0.9 includes:
+The current build includes:
 
 - Rapier fixed-step vehicle physics with exactly one shared world step per simulation tick.
 - Smoother digital steering, speed-sensitive steering lock, pedal smoothing, restrained collider bounce, and improved slide recovery.
 - Four racers: YOU, KOJO, AMA, and MENSAH, with distinct Ghana taxi-inspired colors.
 - Lane-aware AI overtaking and magnetic-field avoidance.
-- Three tracks: North Loop, Tema Harbour Run and Accra Ring Night Run.
+- Four tracks: North Loop, Tema Harbour Run, Accra Ring Night Run and Cape Coast Rush.
 - Wide, width-aware road geometry, lane markings, barriers, pickup placement, minimap, and lap validation.
 - Two-slot inventory with boost, repair, shield, pulse, and magnet pickups.
 - Automatic pulse target lock, automatic lock switching to the most directly-ahead racer, guided projectile flight, obstruction checks, target reticle, and warning shown to the targeted racer.
@@ -243,4 +243,4 @@ Package only after the working tree is clean and validation passes. Update `READ
 
 ## Immediate start prompt for the next assistant
 
-> Continue Streak from `Sankwan/streakk` branch `development`. Read `AGENTS.md`, `HANDOFF.md` and `docs/rush-pack-0.12.md`. Build Cape Coast Rush as a mixed boulevard/coast/urban circuit, then deterministic low-cost trotro traffic and stronger race feedback before the offline LAN room. Preserve the versioned command/snapshot boundary and one shared Rapier world step per fixed tick. Validate all tests/routes/races/build plus browser playtests, use short commit messages, push validated milestones to `development`, and do not modify `main` without Gabriel's explicit agreement.
+> Continue Streak from `Sankwan/streakk` branch `development`. Read `AGENTS.md`, `HANDOFF.md` and `docs/cape-coast-0.13.md`. Add deterministic low-cost trotro traffic to Cape Coast's marked traffic sector, then stronger race feedback before the offline LAN room. Preserve the versioned command/snapshot boundary and one shared Rapier world step per fixed tick. Validate all tests/routes/races/build plus browser playtests, use short commit messages, push validated milestones to `development`, and do not modify `main` without Gabriel's explicit agreement.

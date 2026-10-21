@@ -1,22 +1,23 @@
-Streak Rush Pack 0.12 validation
+Streak Cape Coast 0.13 validation
 Date: 2026-10-21
 
 npm test
-- 54 tests passed; 0 failed.
-- New coverage includes slipstream eligibility, finished-racer lifecycle behavior and
-  all network, combat, handling and route regressions.
+- 55 tests passed; 0 failed.
+- New coverage includes route zones, mixed local lane counts, coastal environment assets,
+  pickup exclusion in the market squeeze and all existing regressions.
 - Multi-car simulation still advances exactly one shared Rapier world step per tick.
 
 npm run test:routes
 - North Loop finished: 30.15 s, max lateral 8.84 m, 0 off-road ticks.
 - Tema Harbour route check finished: 113.47 s, max lateral 5.71 m, 0 off-road ticks.
 - Accra Ring route check finished: 94.03 s, max lateral 2.31 m, 0 off-road ticks.
+- Cape Coast route check finished: 110.05 s, max lateral 3.22 m, 0 off-road ticks.
 
 npm run test:race
-- All four racers completed two laps on all three tracks.
+- All four racers completed two laps on all four tracks.
 - 0 recoveries and 0 off-road ticks on every track.
 - Maximum dynamic bodies: 4; projectiles: 1; magnetic fields: 1.
-- Tema pack completed in 169.10 s; Accra Ring completed in 134.70 s.
+- Tema pack completed in 169.10 s; Accra Ring in 134.70 s; Cape Coast in 155.85 s.
 - The leading full-circuit cars finished within roughly 4–6 seconds.
 
 npm run build -- --configLoader runner
@@ -25,7 +26,7 @@ npm run build -- --configLoader runner
 - Shared Three.js/Rapier chunk remains about 1.86 MB gzip and needs later loading optimisation.
 
 Runtime availability check
-- The existing Vite server returned HTTP 200 and served the Rush Pack 0.12 page.
+- The existing Vite server hot-reloads the Cape Coast 0.13 source for manual playtesting.
 - Protocol commands, snapshots, sequence rejection, reset-safe event IDs and multi-human command dispatch have focused coverage.
 - Interactive computer/browser control was disabled in Work settings, so this run could
   not repeat the earlier manual driving, camera-comfort and live FPS inspection.

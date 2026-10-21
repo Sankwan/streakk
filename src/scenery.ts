@@ -6,6 +6,7 @@ export function facadeSites(course:Course){
  const sites:{s:number;x:number;z:number;ax:number;az:number;hw:number;hd:number;side:number}[]=[];
  for(let s=65;s<course.length-40;s+=85)for(const side of [-1,1]){
   const p=course.sample(s),hw=9,hd=6;
+  const zone=course.zoneAt(s);if(zone?.kind==='coast'||zone?.kind==='squeeze')continue;
   const c=p.position.clone().addScaledVector(p.right,side*(p.width/2+hd+9));
   // Sample the complete expanded footprint, not just a point on the road's current segment.
   let safe=true;
