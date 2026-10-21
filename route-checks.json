@@ -1,0 +1,61 @@
+[
+  {
+    "id": "north-loop",
+    "seconds": 59.3,
+    "recoveries": 0,
+    "collections": 4,
+    "uses": 2,
+    "offroadTicks": 0,
+    "maxBodies": 2,
+    "racers": [
+      {
+        "id": "you",
+        "laps": 2,
+        "finishTime": 57.2166666666647,
+        "health": 100,
+        "inventory": []
+      },
+      {
+        "id": "kojo",
+        "laps": 2,
+        "finishTime": 59.299999999997915,
+        "health": 100,
+        "inventory": [
+          "repair",
+          "repair"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tema-harbour",
+    "seconds": 226.02,
+    "recoveries": 0,
+    "collections": 7,
+    "uses": 3,
+    "offroadTicks": 0,
+    "maxBodies": 2,
+    "racers": [
+      {
+        "id": "you",
+        "laps": 2,
+        "finishTime": 223.45000000006996,
+        "health": 100,
+        "inventory": [
+          "repair",
+          "shield"
+        ]
+      },
+      {
+        "id": "kojo",
+        "laps": 2,
+        "finishTime": 226.01666666673867,
+        "health": 100,
+        "inventory": [
+          "repair",
+          "repair"
+        ]
+      }
+    ]
+  }
+]
