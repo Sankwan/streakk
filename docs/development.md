@@ -6,7 +6,7 @@ The project owner authorizes pushing completed builds to `development` as work p
 
 1. Inspect the current remote head; preserve existing work and history.
 2. Make the change, keep source credits and version notes, and run relevant tests.
-3. Run all shared-race checks before completing a simulation milestone: unit/regression tests, standalone route checks, two-car race checks, and the production build.
+3. Run all shared-race checks before completing a simulation milestone: unit/regression tests, standalone route checks, four-car race checks, and the production build.
 4. Exercise the changed player flow in a browser. Record device/performance and human-playtest gaps rather than presenting automated success as complete qualification.
 5. Commit and push to `development`; verify the remote commit SHA and CI result. A completed local build is not a successful GitHub push.
 6. Download the matching artifact for playtesting. Record bugs against the exact commit/build.
@@ -25,9 +25,13 @@ Repository policy is recorded in AGENTS.md. Server-enforced protection is a sepa
 
 ## Current evidence and limitations
 
-First Race 0.5 has 25 passing local tests, complete two-car/two-lap headless runs on both tracks without off-road ticks/recoveries, and browser evidence of manual driving, pickup collection/use, assisted race completion and restart. These records predate repository CI and are not a claim that GitHub Actions has run.
+Handling Pass 0.9 smooths digital steering and pedals, adds stronger speed-sensitive steering lock, biases grip toward stable mild understeer, lowers chassis bounce/friction for pack contact, and smooths both chase heading and look target. Forty-five local tests pass. Both route checks stay on-road and every racer completes both four-car races without a recovery. This remains an automated/assisted check pending hands-on tuning on more hardware.
 
-The next projectile pass must check tunnelling, solid-world obstruction, self-hit protection, duplicate hits, shield timing, damage attribution and bounded disruption. Test player/AI symmetry and preserve exactly one shared world step per tick. The maximum two-car test is not a qualification for an eight-car pack or offline LAN.
+Pack Racing 0.8 runs YOU, KOJO, AMA and MENSAH in one shared Rapier world. AI racers reassess four legal lanes, pass a slower car and choose the narrow outside escape lines when a magnetic field lies ahead. Forty-three local tests pass. Both four-car/two-lap checks finish without recoveries or off-road ticks; Tema exercises six magnetic fields and three guided hits. A local browser run displayed all four markers/cars and held 60 FPS at 1.35× render scale with 17.4 ms p95 frame interval, 126 draw calls and 557k triangles on the current desktop. This single-machine assisted run is not mobile qualification or a human handling test.
+
+Pulse Combat 0.6 has 37 passing local tests, complete two-car/two-lap checks on both tracks without off-road ticks/recoveries, and a successful production build. Controlled browser cases previously confirmed hits, shield absorption, solid barriers and moving targets. The normal race browser check confirmed collection, aim marker, E firing and restart cleanup. The short eight-shot lab recorded 17.6 ms p95 / 17.7 ms max; see pulse-combat-0.6.md for scope. Two-car checks do not qualify an eight-car pack or offline LAN.
+
+First Race 0.5 was pushed to development at dbb781e1e2a3ed3ec75baeca9e5d44523fdf4638; GitHub Actions run 39606286497 passed. Each subsequent push needs its own verified remote head and CI result.
 
 Workflow actions follow their official documentation:
 - https://github.com/actions/checkout

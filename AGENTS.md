@@ -4,6 +4,7 @@
 
 The project owner has authorized pushing completed builds to https://github.com/Sankwan/streakk without asking again for every development push.
 
+- Keep commit messages short. Do not add AI co-author trailers or agent accounts as repository collaborators.
 - Develop and push completed, validated work on `development` (or merge a bounded feature branch into it).
 - Do not push game changes to `main`, merge a release PR, or enable automatic release merging until the project owner explicitly agrees to promote that specific tested build.
 - Check the remote branch heads before updates. Preserve existing remote history and unrelated work. Never force-push as a shortcut.

@@ -1,164 +1,36 @@
+Streak Handling Pass 0.9 validation
+Date: 2026-10-21
 
-> streak-race@0.5.0 test
-> node --experimental-strip-types --test tests/*.test.ts
+npm test
+- 45 tests passed; 0 failed.
+- Includes four stable racer identities/grid slots, exactly one shared world step,
+  lane-aware overtaking, magnetic outside-line avoidance, target switching,
+  incoming warnings, guided collision, progressive/self-centring steering,
+  speed-sensitive lock, low-bounce contact tuning and prior regressions.
 
-TAP version 13
-# Subtest: donor axis, wheel anchors and suspension map onto the existing Rapier chassis
-ok 1 - donor axis, wheel anchors and suspension map onto the existing Rapier chassis
-  ---
-  duration_ms: 0.60075
-  type: 'test'
-  ...
-# Subtest: render budget lowers resolution under sustained load and recovers conservatively
-ok 2 - render budget lowers resolution under sustained load and recovers conservatively
-  ---
-  duration_ms: 1.126
-  type: 'test'
-  ...
-# Subtest: adapted shopfront footprints keep a usable margin from either circuit
-ok 3 - adapted shopfront footprints keep a usable margin from either circuit
-  ---
-  duration_ms: 331.64325
-  type: 'test'
-  ...
-# Subtest: active long frame stalls remain visible to the render budget
-ok 4 - active long frame stalls remain visible to the render budget
-  ---
-  duration_ms: 0.388875
-  type: 'test'
-  ...
-# Subtest: two racers submit forces before exactly one shared world step; countdown freezes the race
-ok 5 - two racers submit forces before exactly one shared world step; countdown freezes the race
-  ---
-  duration_ms: 234.325583
-  type: 'test'
-  ...
-# Subtest: split vehicle force/capture phases preserve the standalone handling result
-ok 6 - split vehicle force/capture phases preserve the standalone handling result
-  ---
-  duration_ms: 23.886958
-  type: 'test'
-  ...
-# Subtest: pickup claims are unique, inventory bounded, cooldown uses simulation time, reset clears state
-ok 7 - pickup claims are unique, inventory bounded, cooldown uses simulation time, reset clears state
-  ---
-  duration_ms: 63.649042
-  type: 'test'
-  ...
-# Subtest: boost and shield expire, repair is capped, finished racers cannot consume items
-ok 8 - boost and shield expire, repair is capped, finished racers cannot consume items
-  ---
-  duration_ms: 16.215
-  type: 'test'
-  ...
-# Subtest: swept collection catches fast crossings, rejects high airborne passes and uses stable IDs
-ok 9 - swept collection catches fast crossings, rejects high airborne passes and uses stable IDs
-  ---
-  duration_ms: 2.068959
-  type: 'test'
-  ...
-# Subtest: both racers obey ordered lap validation and deterministic standings
-ok 10 - both racers obey ordered lap validation and deterministic standings
-  ---
-  duration_ms: 12.058333
-  type: 'test'
-  ...
-# Subtest: a real wall impact damages an unshielded racer and is absorbed with an active shield
-ok 11 - a real wall impact damages an unshielded racer and is absorbed with an active shield
-  ---
-  duration_ms: 38.685375
-  type: 'test'
-  ...
-# Subtest: boost increases real Rapier acceleration and stops applying force after its deadline
-ok 12 - boost increases real Rapier acceleration and stops applying force after its deadline
-  ---
-  duration_ms: 38.675
-  type: 'test'
-  ...
-# Subtest: North Loop retains its original centreline, length, spawn and heading
-ok 13 - North Loop retains its original centreline, length, spawn and heading
-  ---
-  duration_ms: 7.858042
-  type: 'test'
-  ...
-# Subtest: Tema compiles as a wide four-lane closed circuit with consistent width-aware projection
-ok 14 - Tema compiles as a wide four-lane closed circuit with consistent width-aware projection
-  ---
-  duration_ms: 24.700625
-  type: 'test'
-  ...
-# Subtest: visible road boundary and Rapier barrier face use matching compiled sections
-ok 15 - visible road boundary and Rapier barrier face use matching compiled sections
-  ---
-  duration_ms: 118.480083
-  type: 'test'
-  ...
-# Subtest: pickup groups scale with width and preserve a bypass corridor
-ok 16 - pickup groups scale with width and preserve a bypass corridor
-  ---
-  duration_ms: 15.179208
-  type: 'test'
-  ...
-# Subtest: invalid geometry and unsupported elevation are rejected before runtime mutation
-ok 17 - invalid geometry and unsupported elevation are rejected before runtime mutation
-  ---
-  duration_ms: 2.679042
-  type: 'test'
-  ...
-# Subtest: laps require a complete ordered forward circuit; reset/backward/teleport cannot award laps
-ok 18 - laps require a complete ordered forward circuit; reset/backward/teleport cannot award laps
-  ---
-  duration_ms: 10.936667
-  type: 'test'
-  ...
-# Subtest: track collider replacement leaves one car and valid wheel contacts on either track
-ok 19 - track collider replacement leaves one car and valid wheel contacts on either track
-  ---
-  duration_ms: 219.735083
-  type: 'test'
-  ...
-# Subtest: lane marking instances align with the local road direction
-ok 20 - lane marking instances align with the local road direction
-  ---
-  duration_ms: 32.175541
-  type: 'test'
-  ...
-# Subtest: suspension settles, acceleration moves forward, brakes stop the car
-ok 21 - suspension settles, acceleration moves forward, brakes stop the car
-  ---
-  duration_ms: 123.186167
-  type: 'test'
-  ...
-# Subtest: same fixed-step inputs produce the same result at 30 and 144 render FPS
-ok 22 - same fixed-step inputs produce the same result at 30 and 144 render FPS
-  ---
-  duration_ms: 114.509625
-  type: 'test'
-  ...
-# Subtest: reset clears motion and long render stalls do not cause unbounded catch-up
-ok 23 - reset clears motion and long render stalls do not cause unbounded catch-up
-  ---
-  duration_ms: 9.991083
-  type: 'test'
-  ...
-# Subtest: chassis cannot pass through a solid barrier
-ok 24 - chassis cannot pass through a solid barrier
-  ---
-  duration_ms: 39.923833
-  type: 'test'
-  ...
-# Subtest: handbrake creates a wider slide, then grip recovers after release
-ok 25 - handbrake creates a wider slide, then grip recovers after release
-  ---
-  duration_ms: 60.177875
-  type: 'test'
-  ...
-1..25
-# tests 25
-# suites 0
-# pass 25
-# fail 0
-# cancelled 0
-# skipped 0
-# todo 0
-# duration_ms 1192.089875
+npm run test:routes
+- North Loop finished: 30.15 s, 0 off-road ticks.
+- Tema Harbour finished: 113.47 s, 0 off-road ticks.
+
+npm run test:race
+- All four racers completed two laps on both tracks.
+- 0 recoveries and 0 off-road ticks on both tracks.
+- North produced 2 guided pulse hits; Tema produced 4 magnetic deployments and 2 hits.
+- Maximum dynamic bodies: 4; projectiles: 1; magnetic fields: 1.
+
+npm run build -- --configLoader runner
+- TypeScript and Vite production build passed.
+- Shared Three.js/Rapier chunk remains about 1.86 MB gzip and needs later loading optimisation.
+
+Browser check · current desktop · assisted Tema demo
+- All four race entries, three rivals/minimap markers and distinct taxi liveries displayed.
+- Automatic graphics held 60 FPS at 1.35× render scale.
+- Full-pack sample: 17.4 ms p95 / 16.7 ms median, 126 draw calls, 557k triangles.
+- Handling pass manual-drive sample: 17.5 ms p95 / 16.7 ms median at 1.35×;
+  steering built progressively, released cleanly and the camera recovered without a cut.
+- No visible runtime error panel appeared.
+
+Limits
+- Assisted demo is not a human handling test.
+- One desktop sample does not qualify mobile or lower-end hardware.
+- LAN, voice, online matchmaking and the requested mine are not implemented.

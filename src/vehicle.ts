@@ -5,9 +5,9 @@ import { approach, clamp, STEP } from './math.ts';
 // Original Streak tuning. Schema research informs the questions, not these equations.
 export interface Tuning { grip: number; driftGrip: number; steer: number; recovery: number; power: number; }
 export const PRESETS: Record<string, Tuning> = {
-  balanced: { grip: 1.35, driftGrip: .48, steer: .48, recovery: 7, power: 10600 },
-  planted: { grip: 1.65, driftGrip: .64, steer: .43, recovery: 10, power: 10000 },
-  loose: { grip: 1.2, driftGrip: .34, steer: .53, recovery: 4, power: 11000 },
+  balanced: { grip: 1.35, driftGrip: .48, steer: .46, recovery: 7, power: 10600 },
+  planted: { grip: 1.65, driftGrip: .64, steer: .41, recovery: 10, power: 10000 },
+  loose: { grip: 1.2, driftGrip: .34, steer: .5, recovery: 4, power: 11000 },
 };
 export interface DriverInput { throttle: number; brake: number; steer: number; handbrake: boolean; }
 export const EMPTY_INPUT: DriverInput = { throttle: 0, brake: 0, steer: 0, handbrake: false };
@@ -19,7 +19,12 @@ export class Vehicle {
   tuning: Tuning = { ...PRESETS.balanced };
   mass = 1150;
   steer = 0;
-  gripResponse = 10;
+  steeringFloor = .075;
+  steeringFalloff = 15;
+  steerInput = 0;
+  throttleInput = 0;
+  brakeInput = 0;
+  gripResponse = 11.5;
   wheels = [new Vector3(-.88, -.08, -1.4), new Vector3(.88, -.08, -1.4), new Vector3(-.88, -.08, 1.4), new Vector3(.88, -.08, 1.4)];
   wheelTravel = [.45, .45, .45, .45];
   contacts = 0;
@@ -37,8 +42,8 @@ export class Vehicle {
   spawnRotation = new Quaternion();
   constructor(world: RAPIER.World) {
     this.world = world;
-    this.body = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(0, .85, 0).setLinearDamping(.04).setAngularDamping(1.25).setCcdEnabled(true));
-    this.collider = world.createCollider(RAPIER.ColliderDesc.cuboid(.91, .27, 1.95).setMass(this.mass).setFriction(.15).setRestitution(.08), this.body);
+    this.body = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(0, .85, 0).setLinearDamping(.04).setAngularDamping(1.5).setCcdEnabled(true));
+    this.collider = world.createCollider(RAPIER.ColliderDesc.cuboid(.91, .27, 1.95).setMass(this.mass).setFriction(.12).setRestitution(.02), this.body);
     this.reset();
   }
   setSpawn(position: Vector3, rotation: Quaternion) { this.spawnPosition.copy(position); this.spawnRotation.copy(rotation); this.reset(); }
@@ -46,7 +51,7 @@ export class Vehicle {
     this.body.setTranslation(this.spawnPosition, true); this.body.setRotation(this.spawnRotation, true);
     this.body.setLinvel({ x: 0, y: 0, z: 0 }, true); this.body.setAngvel({ x: 0, y: 0, z: 0 }, true);
     this.body.resetForces(true); this.body.resetTorques(true);
-    this.boostActive = false; this.steer = 0; this.speed = 0; this.forwardSpeed = 0; this.slip = 0; this.contacts = 0;
+    this.boostActive = false; this.steer = this.steerInput = this.throttleInput = this.brakeInput = 0; this.gripResponse=11.5;this.speed = 0; this.forwardSpeed = 0; this.slip = 0; this.contacts = 0;
     this.previousPosition.copy(this.spawnPosition); this.currentPosition.copy(this.spawnPosition);
     this.previousRotation.copy(this.spawnRotation); this.currentRotation.copy(this.spawnRotation);
   }
@@ -65,13 +70,17 @@ export class Vehicle {
     const av = this.body.angvel();
     this.forwardSpeed = vel.dot(forward); this.speed = Math.hypot(vel.x, vel.z);
     this.slip = Math.atan2(vel.dot(right), Math.max(2, Math.abs(this.forwardSpeed)));
-    const steeringLimit = this.tuning.steer / (1 + this.speed / 24);
-    this.steer = approach(this.steer, clamp(input.steer, -1, 1) * steeringLimit, 9, STEP);
-    this.gripResponse = approach(this.gripResponse, input.handbrake ? 2.2 : 11, this.tuning.recovery, STEP);
+    const desiredSteer=clamp(input.steer,-1,1),towardLock=Math.sign(desiredSteer)===Math.sign(this.steerInput)&&Math.abs(desiredSteer)>Math.abs(this.steerInput);
+    this.steerInput=approach(this.steerInput,desiredSteer,this.steerInput===0||towardLock?4.5:8,STEP);
+    const speedRatio=this.speed/this.steeringFalloff,steeringLimit=this.steeringFloor+(this.tuning.steer-this.steeringFloor)/(1+speedRatio*speedRatio);
+    this.steer = approach(this.steer, this.steerInput * steeringLimit, 4, STEP);
+    this.throttleInput=approach(this.throttleInput,clamp(input.throttle,0,1),input.throttle>this.throttleInput?6.5:input.brake>.05?18:10,STEP);
+    this.brakeInput=approach(this.brakeInput,clamp(input.brake,0,1),input.brake>this.brakeInput?9:11,STEP);
+    this.gripResponse = approach(this.gripResponse, input.handbrake ? 2.2 : 11.5, this.tuning.recovery, STEP);
     this.body.resetForces(true); this.body.resetTorques(true); this.contacts = 0;
-    const reverse = input.brake > 0 && this.forwardSpeed < .8 && input.throttle === 0;
-    const throttle = reverse ? -input.brake * .48 : input.throttle;
-    const brake = reverse ? 0 : input.brake;
+    const reverse = this.brakeInput > 0 && this.forwardSpeed < .8 && this.throttleInput === 0;
+    const throttle = reverse ? -this.brakeInput * .48 : this.throttleInput;
+    const brake = reverse ? 0 : this.brakeInput;
     const speedLimit = throttle < 0 ? 12 : this.boostActive ? 62 : 54;
     const engine = this.tuning.power * throttle * Math.max(0, 1 - Math.max(0, this.forwardSpeed * Math.sign(throttle)) / speedLimit) * (this.offroad ? .55 : 1) * (this.boostActive ? 1.65 : 1);
     for (let i = 0; i < 4; i++) {
@@ -92,9 +101,9 @@ export class Vehicle {
       const wheelRight = wheelForward.clone().cross(normal).normalize();
       const longitudinal = pv.dot(wheelForward), lateral = pv.dot(wheelRight);
       let fx = engine / 4;
-      fx -= Math.sign(longitudinal) * Math.min(Math.abs(longitudinal) * this.mass / (4 * STEP), brake * 17000 / 4);
+      fx -= Math.sign(longitudinal) * Math.min(Math.abs(longitudinal) * this.mass / (4 * STEP), brake * 18500 / 4);
       if (input.handbrake && !front) fx -= Math.sign(longitudinal) * Math.min(Math.abs(longitudinal) * this.mass / (4 * STEP), 1700);
-      const response = front ? 11 : this.gripResponse;
+      const response = front ? 9.5 : this.gripResponse;
       const fy = -lateral * (this.mass / 4) * response;
       const mu = this.tuning.grip * ((!front && input.handbrake) ? this.tuning.driftGrip : 1) * (this.offroad ? .65 : 1);
       const capacity = spring * mu;

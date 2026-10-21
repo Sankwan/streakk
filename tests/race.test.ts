@@ -4,7 +4,7 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import {Vector3} from 'three';
 import {createCourse,addPhysics} from '../src/track.ts';
 import {Vehicle,EMPTY_INPUT} from '../src/vehicle.ts';
-import {RaceSimulation} from '../src/race/simulation.ts';
+import {RaceSimulation,chooseAILane,type MagnetField} from '../src/race/simulation.ts';
 import {makePickups,segmentHit} from '../src/race/pickups.ts';
 await RAPIER.init();
 function setup(){const world=new RAPIER.World({x:0,y:-9.81,z:0}),course=createCourse('tema-harbour');world.timestep=1/60;addPhysics(world,course);world.step();return {world,course,sim:new RaceSimulation(world,course)};}
@@ -15,6 +15,19 @@ test('two racers submit forces before exactly one shared world step; countdown f
  active(sim);for(let i=0;i<120;i++)sim.tick({drive:{...EMPTY_INPUT,throttle:1}});
  assert.equal(steps,120);assert.equal(sim.ticks,120);assert.ok(sim.player.vehicle.speed>5);assert.ok(sim.racers.get('kojo')!.vehicle.speed>5);
  world.free();
+});
+test('four-car pack has stable identities, distinct grid slots and one shared physics step',()=>{
+ const world=new RAPIER.World({x:0,y:-9.81,z:0}),course=createCourse('tema-harbour');world.timestep=1/60;addPhysics(world,course);world.step();const sim=new RaceSimulation(world,course,4);
+ assert.deepEqual([...sim.racers.keys()],['you','kojo','ama','mensah']);assert.equal(world.bodies.len(),4);
+ const positions=[...sim.racers.values()].map(r=>r.vehicle.currentPosition);for(let i=0;i<positions.length;i++)for(let j=i+1;j<positions.length;j++)assert.ok(positions[i].distanceTo(positions[j])>4);
+ let steps=0;const step=world.step.bind(world);world.step=()=>{steps++;step();};active(sim);sim.tick({drive:EMPTY_INPUT});assert.equal(steps,1);world.free();
+});
+test('lane-aware AI overtakes a blocked lane and takes an outside magnet escape line',()=>{
+ const world=new RAPIER.World({x:0,y:-9.81,z:0}),course=createCourse('tema-harbour');world.timestep=1/60;addPhysics(world,course);world.step();const sim=new RaceSimulation(world,course,4),racer=sim.racers.get('kojo')!,blocker=sim.racers.get('ama')!;
+ const s=course.length*.3,here=course.sample(s);racer.s=s;racer.aiLane=0;racer.vehicle.currentPosition.copy(here.position);blocker.s=here.s+12;blocker.vehicle.currentPosition.copy(course.sample(blocker.s).position);
+ const openLane=chooseAILane(racer,course,sim.racers.values(),[]);assert.ok(Math.abs(openLane)>1,'blocked centre line should trigger an overtake');
+ blocker.finishTime=1;const field:MagnetField={id:'test',ownerId:'you',s:course.sample(s+30).s,position:course.sample(s+30).position,right:course.sample(s+30).right,halfWidth:here.width*.56/2,halfLength:12,expiresAt:10};
+ const escape=chooseAILane(racer,course,sim.racers.values(),[field]);assert.ok(Math.abs(escape)>field.halfWidth,'magnet should send AI outside the active strip');assert.ok(Math.abs(escape)<=here.width/2-4+.01,'lane remains inside the barriers');world.free();
 });
 test('split vehicle force/capture phases preserve the standalone handling result',()=>{
  const worlds=[new RAPIER.World({x:0,y:-9.81,z:0}),new RAPIER.World({x:0,y:-9.81,z:0})];
